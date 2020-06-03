@@ -1,20 +1,24 @@
+#!/usr/bin/python3
 import os
 import sys
+import argparse
 
 sys.path.insert(0, "printing")
 from printing import Printing as p
 
 def main():
-    p.prRed("this is an error")
-    #prGreen("this is good")
-    #prYellow("this is yellow")
-    #prLightPurple("not sure")
-    #prCyan("use for dividers")
+    parser = argparse.ArgumentParser()
 
-    #
-    #prCyan("="*75)
-    #prIntro("d++", "5")
-    #prCyan("-"*75)
+    parser.add_argument("hw", type=str, help="path to the homework to grade")
+    parser.add_argument("part", type=int, help="part of the homework to grade")
+    parser.add_argument("student", type=str, help="the name of student/group to grade")
+
+    args = parser.parse_args()
+
+    print(args.hw, args.part, args.student)
+
+
+
 
 if __name__ == '__main__':
     main()
