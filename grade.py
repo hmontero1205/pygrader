@@ -17,8 +17,6 @@ def main():
 
     args = parser.parse_args()
 
-    print(args.hw, args.part, args.student)
-
     tester = Grader(args.hw, args.part, args.student)
 
     tester.run_test(1, args.student)
@@ -46,9 +44,6 @@ class Grader():
         self.saved_cwd = os.getcwd()
         os.chdir(hw_class.root)
 
-        print(self.rubric)
-
-
 
     def setup(self, hw, student):
         pass
@@ -69,10 +64,11 @@ class Grader():
             for n,j in enumerate(self.rubric[item]):
                 os.chdir(j['dir'])
                 p.prCyan("grade {}.{}: {}".format(item, n+1, j['desc']))
-                p.prCyan("-"*80)
+                p.prCyan("-"*85)
                 for i in j['cmd']:
-                    cmd = run_cmd(i)
-                    print(cmd.stdout.read())
+                    #cmd = run_cmd(i)
+                    #print(cmd.stdout.read())
+                    os.system(i)
                 print('\n')
                 p.prCyan("-"*85)
 
