@@ -2,7 +2,6 @@
 
 to test:
 
-- unzip a hw1 solution
-- move the folder into hw1 folder 
-- rename the folder to `sav`
-- run hw1_conf.py
+- unzip hw1 solutions.tgz into hw1 folder 
+- take one submition and extact the tgz
+- run ./grade.py hw1 <#> <uni>
