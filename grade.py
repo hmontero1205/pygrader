@@ -29,6 +29,12 @@ def run_cmd(cmd):
     p.wait()
     return p
 
+def check_file(fneme):
+    if os.path.isfile(fname):
+        return 0 
+    else:
+        return 1
+
 class Grader():
 
     def __init__(self, hw, part, student):
@@ -39,7 +45,7 @@ class Grader():
 
         hw_class = HW1()
         self.rubric = hw_class.rubric
-        self.root = hw_class.root
+        self.hw_root = os.path.abspath(hw_class.root)
 
         self.saved_cwd = os.getcwd()
         os.chdir(hw_class.root)
@@ -51,18 +57,40 @@ class Grader():
     def cleanup(self):
         pass
 
+    def inspect_file(self, fname, grep):
+        if check_file(fname):
+            raise ValueError("{} does not exist".format(fname))
+
+
+    def compile_code(self, fname):
+        pass
+
+    def inster_mod(self, mod, kedr=True):
+        pass
+
+    def remove_mod(self, mod, kedr=True):
+        pass
+
+    def checkout_branch(self, branch):
+        pass
+
+    def print_intro(self, name, part):
+        p.prCyan("="*85)
+        p.prIntro(name, part)
+        p.prCyan("-"*85)
+
     def run_test(self, part, student):
 
-        os.chdir(student+'/hw1')
+        student_dir = os.path.join(self.hw_root, student)
+        grade_dir = os.path.join(student_dir, 'hw1')
+        os.chdir(grade_dir)
 
-
-        p.prCyan("="*85)
-        p.prIntro("d++", "all")
-        p.prCyan("-"*85)
+        self.print_intro(sudent, part)
 
         for item in self.rubric:
             for n,j in enumerate(self.rubric[item]):
-                os.chdir(j['dir'])
+                part_dir = os.path.join(grade_dir, j['dir'])
+                os.chdir(part_dir)
                 p.prCyan("grade {}.{}: {}".format(item, n+1, j['desc']))
                 p.prCyan("-"*85)
                 for i in j['cmd']:
