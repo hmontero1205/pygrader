@@ -16,6 +16,7 @@ RMMOD       = "sudo rmmod {}"
 KEDR_STOP   = "sudo kedr stop {}"
 DMESG       = "sudo dmesg"
 DMESG_C     = "sudo dmesg -C"
+MAKE        = "make clean && make"
 
 def main():
     parser = argparse.ArgumentParser()
@@ -54,10 +55,12 @@ class Grader():
 
         hw_class = HW1()
         self.rubric = hw_class.rubric
-        self.hw_root = os.path.abspath(hw_class.root)
+        self.hw_root = hw_class.root
+        print("hw_root: ", self.hw_root)
+        self.grade_dir = hw_class.grade_dir
+        print("grade_dir: ", self.grade_dir)
 
-        self.saved_cwd = os.getcwd()
-        os.chdir(hw_class.root)
+        os.chdir(hw_class.grade_dir)
 
 
     def setup(self, hw, student):
@@ -82,10 +85,7 @@ class Grader():
         os.system("make")
         os.chdir(save_dir)
 
-    def insert_mod(self, cd, mod, kedr=True):
-        save_dir = os.path.abspath(os.getcwd())
-        wd = os.path.join(save_dir, cd)
-        os.chdir(wd)
+    def insert_mod(self, mod, kedr=True):
         if subprocess.call(DMESG_C.split()) != 0:
             pass
         if subprocess.call(KEDR_START.format(mod).split()) != 0:
@@ -93,20 +93,15 @@ class Grader():
         if subprocess.call(INSMOD.format(mod).split()) != 0:
             pass
 
-        os.chdir(save_dir)
 
-
-    def remove_mod(self, cd,  mod, kedr=True):
-        save_dir = os.path.abspath(os.getcwd())
-        wd = os.path.join(save_dir, cd)
-        os.chdir(wd)
+    def remove_mod(self,  mod, dmesg=True, kedr=True):
         if subprocess.call(RMMOD.format(mod).split()) != 0:
             pass
         if subprocess.call(KEDR_STOP.format(mod).split()) != 0:
             pass
-
-        os.system(DMESG)
-        os.chdir(save_dir)
+        
+        if dmesg:
+            os.system(DMESG)
 
     def checkout_branch(self, branch):
         pass
@@ -116,22 +111,93 @@ class Grader():
         p.prIntro(name, part)
         p.prCyan("-"*85)
 
-    def run_code(self, cd, fname):
+    def run_file(self, fname, cd):
         save_dir = os.path.abspath(os.getcwd())
-        wd = os.path.join(save_dir, cd)
-        os.chdir(wd)
+        os.chdir(cd)
         print(os.getcwd())
-        subprocess.call(fname, shell=True)
+        #subprocess.call(fname, shell=True)
+        os.system(fname)
         os.chdir(save_dir)
+    
+    def run_commend(self, cmd):
+        os.system(cmd)
+
+    def grade_section(self, section, key):
+        desc = section['desc']
+        points = section['points']
+        cmds = section['cmd']
+        os.chdir(section['dir'])
+        
+        p.prPurple("Grading Item {}: ".format(key))
+        p.prCyan(desc)
+        p.prCyan('-'*85)
+
+        for cmd in cmds:
+            func = cmd['type']
+            args = cmd['args']
+
+            if func == 'inspect':
+                self.inspect_file(args[0], args[1])
+            elif func == 'insert':
+                os.system(MAKE)
+                self.insert_mod(args[0])
+            elif func == 'remove':
+                dmesg = False if len(args) > 1 else True
+                self.remove_mod(args[0], dmesg)
+            elif func == 'run_commend':
+                self.run_commend(args[0])
+            elif func == 'execute':
+                self.run_file(args[0], args[1])
 
 
-    def run_test(self, table, student):
 
-        student_dir = os.path.join(self.hw_root, student)
-        grade_dir = os.path.join(student_dir, 'hw1')
-        os.chdir(grade_dir)
+    def run_test(self, table_key, student):
 
-        self.print_intro(student, table)
+
+        self.print_intro(student, table_key)
+        
+        table_keys = [*self.rubric.keys()]
+        
+        if table_key not in table_keys:
+            return 0
+
+        table = self.rubric[table_key]
+
+        for section in table:
+            #print(key)
+
+            #print(table[key])
+            
+            while True:
+
+                self.grade_section(table[section], section)
+
+                p.prRed("Run test again? (Y/n)")
+
+                inval = input()
+
+                if inval != 'Y':
+                    break
+
+            p.prCyan('-'*85) 
+            '''
+            desc = table[key]['desc']
+            p.prPurple("Grading Item {}: ".format(key))
+            p.prCyan(desc)
+            p.prCyan('-'*85)
+            
+            if not fname:
+                fname = table[key]['file']
+            if table[key]['type'] == 'inspect':
+                args = table[key]['arg']
+                self.inspect_file(fname, args)
+            elif table[key]['type'] == 'insert_remove':
+                self.insert_mod(fname+'.ko')
+                self.remove_mod(fname)
+        
+
+            print() 
+            p.prCyan('-'*85)
 
         for item in self.rubric[table]:
 
@@ -165,7 +231,7 @@ class Grader():
 
                     if text != 'Y':
                         break
-
+        '''
 
 if __name__ == '__main__':
     main()
