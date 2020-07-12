@@ -22,28 +22,27 @@ class RubricItem():
         self.funct = funct
 
     def test_item(self):
+        p.prCyan('='*85)
         while True:
             # print info text 
-            p.prCyan('='*85)
-            p.prGreen('Garding: {} [{} points]'.format(self.table_item, self.points))
+            p.prGreen('Garding: {}'.format(self.table_item))
 
-            for d in self.desc:
-                p.prLightPurple(d)
+            for i, d in enumerate(self.desc):
+                p.prLightPurple("\t{}.{} ({}p): {}".format(self.table_item, i+1, self.points[i], d))
             p.prCyan('-'*85)
 
             self.funct()
 
             p.prCyan('-'*85)
-            p.prRed("Do you want to run the test again? [Y/(n)]")
-
-            usr_input = input()
+            usr_input = input("\033[91mDo you want to run the test again [Y/(n)]? \033[00m")
 
             if usr_input != 'Y':
                 break
+
         p.prCyan('-'*85)
         p.prGreen("End test of {}".format(self.table_item))
         p.prCyan('='*85)
-        print()
+        print('\n\n')
 
 def fun():
     print('hello from fun')
