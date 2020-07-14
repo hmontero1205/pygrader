@@ -23,7 +23,8 @@ def main():
 
     tester.grade_table(args.table, args.student)
 
-    p.prCyan("Table {} pts: {}".format(args.table, tester.pts))
+    print("Table {} pts: {}".format(args.table, tester.pts))
+    print(tester.comments)
 
 class Grader():
 
@@ -33,6 +34,7 @@ class Grader():
         self.table = table
         self.student = student
         self.pts = 0
+        self.comments = ""
 
         hw_class = HW1("./hw1", self.student)
         self.rubric = hw_class.rubric
@@ -83,6 +85,9 @@ class Grader():
             except ValueError as e:
                 p.prRed("Enter an int pls...")
         self.pts += int(pts)
+        cmts = input("Comments: ")
+        if cmts:
+            self.comments += "{}; ".format(cmts)
         print("\n\n")
 
     def grade_table(self, table_key, student):
