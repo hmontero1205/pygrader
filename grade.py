@@ -23,6 +23,8 @@ def main():
 
     tester.grade_table(args.table, args.student)
 
+    p.prCyan("Table {} pts: {}".format(args.table, tester.pts))
+
 class Grader():
 
     def __init__(self, hw, student, table):
@@ -30,6 +32,7 @@ class Grader():
         self.hw = hw
         self.table = table
         self.student = student
+        self.pts = 0
 
         hw_class = HW1("./hw1", self.student)
         self.rubric = hw_class.rubric
@@ -59,7 +62,6 @@ class Grader():
             p.prYellow("Open shell & run again (s)")
             p.prYellow("Continue (enter)")
             usr_input = input("\033[91mEnter an action [a|s]:  \033[00m")
-            print("\n\n")
             if usr_input == 'a':
                 continue
             elif usr_input == 's':
@@ -68,6 +70,20 @@ class Grader():
                 continue
             else:
                 break
+        for i, d in enumerate(section.desc):
+                p.prLightPurple("{}.{} ({}p): {}".format(section.table_item,
+                                                           i+1,
+                                                           section.points[i],
+                                                           d))
+        while True:
+            try:
+                pts = int(input("{} ({}p): ".format(section.table_item,
+                                                    sum(section.points))))
+                break
+            except ValueError as e:
+                p.prRed("Enter an int pls...")
+        self.pts += int(pts)
+        print("\n\n")
 
     def grade_table(self, table_key, student):
 
