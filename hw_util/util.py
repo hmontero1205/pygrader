@@ -4,8 +4,7 @@ import sys
 import subprocess
 
 sys.path.append(os.path.abspath('../printing'))
-from printing import Printing 
-p = Printing()
+import printing as p
 
 KEDR_START  = "sudo kedr start {}"
 INSMOD      = "sudo insmod {}"
@@ -54,7 +53,8 @@ def grep_file(fname, grep):
 
 
     grep = grep.format(fname=fname)
-    
+
+    print(grep)
     subprocess.run(grep, shell=True)
 def inspect_file(fname):
     if not file_exist(fname):

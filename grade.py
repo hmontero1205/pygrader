@@ -5,8 +5,7 @@ import argparse
 import subprocess
 
 sys.path.insert(0, "printing")
-from printing import Printing
-p = Printing()
+import printing as p
 sys.path.insert(0, "hw1")
 from hw1 import HW1
 
@@ -21,7 +20,7 @@ def main():
 
     tester = Grader(args.hw, args.student, args.table)
 
-    tester.run_test(args.table, args.student)
+    tester.grade_table(args.table, args.student)
 
 class Grader():
 
@@ -35,22 +34,49 @@ class Grader():
         self.rubric = hw_class.rubric
 
     def print_intro(self, name, part):
-        p.prCyan("="*85)
         p.prIntro(name, part)
-        p.prCyan("="*85)
 
-    def run_test(self, table_key, student):
+    def run_and_prompt(self, section):
+        while True:
+            # TODO: move below to printing mod
+            p.prCyan('-'*85)
+            p.prGreen('Grading: {}'.format(section.table_item))
+            for i, d in enumerate(section.desc):
+                p.prLightPurple("\t{}.{} ({}p): {}".format(section.table_item, i+1, section.points[i], d))
+            p.prCyan('-'*85)
+
+            section.tester()
+
+            p.prCyan('-'*85)
+            p.prGreen("End test of {}".format(section.table_item))
+            p.prCyan('='*85)
+
+            p.prYellow("Run test again (a)")
+            p.prYellow("Open shell & run again (s)")
+            p.prYellow("Continue (enter)")
+            usr_input = input("\033[91mEnter an action [a|s]:  \033[00m")
+            print("\n\n")
+            if usr_input == 'a':
+                continue
+            elif usr_input == 's':
+                p.prRed("^D/exit to end shell session")
+                os.system("bash")
+                continue
+            else:
+                break
+
+    def grade_table(self, table_key, student):
 
         self.print_intro(student, table_key)
         table_keys = [*self.rubric.keys()]
-        
+
         if table_key not in table_keys:
             return 0
 
         table = self.rubric[table_key]
 
         for section in table:
-            table[section].test_item()
+            self.run_and_prompt(table[section])
 
 if __name__ == '__main__':
     main()

@@ -2,9 +2,8 @@ import sys
 #sys.path.insert(0, "../printing")
 import os
 sys.path.append(os.path.abspath('../printing'))
-from printing import Printing
+import printing as p
 
-p = Printing()
 
 class RubricItem():
 
@@ -19,36 +18,35 @@ class RubricItem():
         self.table_item = table_item
         self.desc = desc
         self.points = points
-        self.funct = funct
+        self.tester = funct
 
-    def test_item(self):
-        p.prCyan('='*85)
-        while True:
-            # print info text 
-            p.prGreen('Garding: {}'.format(self.table_item))
+    # def test_item(self):
+    #     while True:
+    #         # print info text 
+    #         p.prGreen('Grading: {}'.format(self.table_item))
 
-            for i, d in enumerate(self.desc):
-                p.prLightPurple("\t{}.{} ({}p): {}".format(self.table_item, i+1, self.points[i], d))
-            p.prCyan('-'*85)
+    #         for i, d in enumerate(self.desc):
+    #             p.prLightPurple("\t{}.{} ({}p): {}".format(self.table_item, i+1, self.points[i], d))
+    #         p.prCyan('-'*85)
 
-            self.funct()
+    #         self.funct()
 
-            p.prCyan('-'*85)
-            usr_input = input("\033[91mDo you want to run the test again [Y/(n)]? \033[00m")
+    #         p.prCyan('-'*85)
+    #         usr_input = input("\033[91mDo you want to run the test again [Y/(n)]? \033[00m")
 
-            if usr_input != 'Y':
-                break
+    #         if usr_input != 'Y':
+    #             break
 
-        p.prCyan('-'*85)
-        p.prGreen("End test of {}".format(self.table_item))
-        p.prCyan('='*85)
-        print('\n\n')
+    #     p.prCyan('-'*85)
+    #     p.prGreen("End test of {}".format(self.table_item))
+    #     p.prCyan('='*85)
+    #     print('\n\n')
 
 def fun():
     print('hello from fun')
 
 if __name__ == '__main__':
-    p.prCyan("FUCK") 
+    p.prCyan("FUCK")
     r = RubricItem('A1', 'test description', 5, fun)
 
-    r.test_item()
+    r.tester()
