@@ -4,8 +4,8 @@ import sys
 import argparse
 import subprocess
 
-sys.path.insert(0, "printing")
-import printing as p
+sys.path.insert(0, "common")
+import common.printing as p
 sys.path.insert(0, "hw1")
 from hw1 import HW1
 

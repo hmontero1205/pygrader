@@ -1,8 +1,8 @@
 import sys
 #sys.path.insert(0, "../printing")
 import os
-sys.path.append(os.path.abspath('../printing'))
-import printing as p
+sys.path.append(os.path.abspath('../common'))
+import common.printing as p
 
 
 class RubricItem():

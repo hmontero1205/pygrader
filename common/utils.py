@@ -3,7 +3,6 @@ import os
 import sys
 import subprocess
 
-sys.path.append(os.path.abspath('../printing'))
 import printing as p
 
 KEDR_START  = "sudo kedr start {}"
