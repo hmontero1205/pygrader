@@ -6,7 +6,7 @@ def prPurple(skk): print("\033[35m{}\033[00m" .format(skk))
 def prCyan(skk): print("\033[96m{}\033[00m" .format(skk))
 def prLightGray(skk): print("\033[97m{}\033[00m" .format(skk))
 def prBlack(skk): print("\033[98m{}\033[00m" .format(skk))
-def prIntro(team, part):
+def prIntro(team, hw, part):
     prCyan("="*85)
-    print("\033[96m{}\033[00m \033[95m {}\033[00m \033[96m {}\033[00m \033[95m {}\033[00m".format(" Grading Team:", team, "part:", part))
+    print("\033[96m{}\033[00m \033[95m{}\033[00m \033[96m {}\033[00m \033[95m{}\033[96m  {}\033[00m \033[95m{}\033[00m".format("Team:", team, "HW:", hw, "Rubric Table:", part))
     prCyan("="*85)

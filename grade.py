@@ -13,7 +13,8 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("hw", type=str, help="path to the homework to grade")
-    parser.add_argument("student", type=str, help="the name of student/group to grade")
+    parser.add_argument("student", type=str,
+                        help="the name of student/group to grade")
     parser.add_argument("table", type=str, help="table to grade")
 
     args = parser.parse_args()
@@ -34,15 +35,18 @@ class Grader():
         self.rubric = hw_class.rubric
 
     def print_intro(self, name, part):
-        p.prIntro(name, part)
+        p.prIntro(name, self.hw, part)
 
     def run_and_prompt(self, section):
         while True:
             # TODO: move below to printing mod
             p.prCyan('-'*85)
-            p.prGreen('Grading: {}'.format(section.table_item))
+            p.prGreen('Grading {}'.format(section.table_item))
             for i, d in enumerate(section.desc):
-                p.prLightPurple("\t{}.{} ({}p): {}".format(section.table_item, i+1, section.points[i], d))
+                p.prLightPurple("{}.{} ({}p): {}".format(section.table_item,
+                                                           i+1,
+                                                           section.points[i],
+                                                           d))
             p.prCyan('-'*85)
 
             section.tester()

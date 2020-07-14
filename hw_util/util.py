@@ -54,7 +54,6 @@ def grep_file(fname, grep):
 
     grep = grep.format(fname=fname)
 
-    print(grep)
     subprocess.run(grep, shell=True)
 def inspect_file(fname):
     if not file_exist(fname):
