@@ -144,7 +144,8 @@ disable=print-statement,
         no-name-in-module,
         too-few-public-methods,
 	subprocess-run-check,
-        import-error
+        import-error,
+        no-self-use
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -316,7 +317,7 @@ good-names=i,
 
 # Good variable names regexes, separated by a comma. If names match any regex,
 # they will always be accepted
-good-names-rgxs=
+good-names-rgxs=^grade_.*,^[A-Za-z][0-9]*$
 
 # Include a hint for the correct naming format with invalid-name.
 include-naming-hint=no
