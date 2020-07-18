@@ -138,7 +138,13 @@ disable=print-statement,
         xreadlines-attribute,
         deprecated-sys-function,
         exception-escape,
-        comprehension-escape
+        comprehension-escape,
+	inconsistent-return-statements,
+        no-else-continue,
+        no-name-in-module,
+        too-few-public-methods,
+	subprocess-run-check,
+        import-error
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -300,8 +306,12 @@ function-naming-style=snake_case
 good-names=i,
            j,
            k,
+           s,
            ex,
            Run,
+           hw,
+           n,
+           e,
            _
 
 # Good variable names regexes, separated by a comma. If names match any regex,
