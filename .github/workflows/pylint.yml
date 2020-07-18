@@ -1,0 +1,22 @@
+# Super basic pylint action
+
+name: pylint
+
+# Run on commits/PRs onto master
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+# Set up a python3 env and run pylint
+jobs:
+  pylint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - run: pip install pylint  # -r requirements.txt
+      - run: pylint $PWD
