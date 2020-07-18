@@ -1,15 +1,15 @@
 #!/usr/bin/python3
-import os
-import sys
-import argparse
-import subprocess
 
-sys.path.insert(0, "common")
-import common.printing as p
-sys.path.insert(0, "hw1")
-from hw1 import HW1
+"""grade.py: Generic grading framework"""
+
+import os
+import argparse
+
+from common import printing as p
+from hw1.hw1 import HW1
 
 def main():
+    """Entry-point into the grader"""
     parser = argparse.ArgumentParser()
 
     parser.add_argument("hw", type=str, help="path to the homework to grade")
@@ -27,9 +27,18 @@ def main():
     print(tester.comments)
 
 class Grader():
+    """Represents the current hw grading session
+
+    Attributes:
+        hw: Homework # being graded (e.g. hw1)
+        table: Table code being graded (based on AP/OS-style rubrics)
+        student: Team/uni of the submission
+        pts: Points this submission has earned
+        comments: Comments left by the grader for this submission
+        rubric: The Rubric object representing this homework
+    """
 
     def __init__(self, hw, student, table):
-
         self.hw = hw
         self.table = table
         self.student = student
@@ -40,50 +49,53 @@ class Grader():
         self.rubric = hw_class.rubric
 
     def print_intro(self, name, part):
-        p.prIntro(name, self.hw, part)
+        """Print the intro banner for this session"""
+        p.print_intro(name, self.hw, part)
 
     def run_and_prompt(self, section):
+        """Runs a grading item and prompts for actions afterwards"""
         while True:
             # TODO: move below to printing mod
-            p.prCyan('-'*85)
-            p.prGreen('Grading {}'.format(section.table_item))
-            for i, d in enumerate(section.desc):
-                p.prLightPurple("{}.{} ({}p): {}".format(section.table_item,
-                                                           i+1,
-                                                           section.points[i],
-                                                           d))
-            p.prCyan('-'*85)
+            p.print_cyan('-'*85)
+            p.print_green('Grading {}'.format(section.table_item))
+            for i, desc in enumerate(section.desc):
+                p.print_light_purple("{}.{} ({}p): {}"
+                                     .format(section.table_item,
+                                             i+1,
+                                             section.points[i],
+                                             desc))
+            p.print_cyan('-'*85)
 
             section.tester()
 
-            p.prCyan('-'*85)
-            p.prGreen("End test of {}".format(section.table_item))
-            p.prCyan('='*85)
+            p.print_cyan('-'*85)
+            p.print_green("End test of {}".format(section.table_item))
+            p.print_cyan('='*85)
 
-            p.prYellow("Run test again (a)")
-            p.prYellow("Open shell & run again (s)")
-            p.prYellow("Continue (enter)")
+            p.print_yellow("Run test again (a)")
+            p.print_yellow("Open shell & run again (s)")
+            p.print_yellow("Continue (enter)")
             usr_input = input("\033[91mEnter an action [a|s]:  \033[00m")
             if usr_input == 'a':
                 continue
             elif usr_input == 's':
-                p.prRed("^D/exit to end shell session")
+                p.print_red("^D/exit to end shell session")
                 os.system("bash")
                 continue
             else:
                 break
-        for i, d in enumerate(section.desc):
-                p.prLightPurple("{}.{} ({}p): {}".format(section.table_item,
-                                                           i+1,
-                                                           section.points[i],
-                                                           d))
+        for i, desc in enumerate(section.desc):
+            p.print_light_purple("{}.{} ({}p): {}".format(section.table_item,
+                                                          i+1,
+                                                          section.points[i],
+                                                          desc))
         while True:
             try:
                 pts = int(input("{} ({}p): ".format(section.table_item,
                                                     sum(section.points))))
                 break
-            except ValueError as e:
-                p.prRed("Enter an int pls...")
+            except ValueError as _:
+                p.print_red("Enter an int pls...")
         self.pts += int(pts)
         cmts = input("Comments: ")
         if cmts:
@@ -91,7 +103,7 @@ class Grader():
         print("\n\n")
 
     def grade_table(self, table_key, student):
-
+        """Starts interactive session for grading the table"""
         self.print_intro(student, table_key)
         table_keys = [*self.rubric.keys()]
 
