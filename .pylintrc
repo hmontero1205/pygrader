@@ -139,17 +139,17 @@ disable=print-statement,
         deprecated-sys-function,
         exception-escape,
         comprehension-escape,
-	inconsistent-return-statements,
+        inconsistent-return-statements,
         no-else-continue,
         no-name-in-module,
         too-few-public-methods,
-	subprocess-run-check,
+        subprocess-run-check,
         import-error,
         no-self-use,
-	missing-function-docstring,
-	bad-continuation,
-	W0311,
-	no-else-return
+        missing-function-docstring,
+        bad-continuation,
+        W0311,
+        no-else-return
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

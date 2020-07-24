@@ -1,43 +1,90 @@
 """printing.py: Colored output helpers"""
 
+CEND = '\33[0m'
+CBOLD = '\33[1m'
+CITALIC = '\33[3m'
+CURL = '\33[4m'
+CBLINK = '\33[5m'
+CBLINK2 = '\33[6m'
+CSELECTED = '\33[7m'
+
+CBLACK = '\33[30m'
+CRED = '\33[31m'
+CGREEN = '\33[32m'
+CYELLOW = '\33[33m'
+CBLUE = '\33[34m'
+CVIOLET = '\33[35m'
+CBEIGE = '\33[36m'
+CWHITE = '\33[37m'
+
+CBLACKBG = '\33[40m'
+CREDBG = '\33[41m'
+CGREENBG = '\33[42m'
+CYELLOWBG = '\33[43m'
+CBLUEBG = '\33[44m'
+CVIOLETBG = '\33[45m'
+CBEIGEBG = '\33[46m'
+CWHITEBG = '\33[47m'
+
+CGREY = '\33[90m'
+CRED2 = '\33[91m'
+CGREEN2 = '\33[92m'
+CYELLOW2 = '\33[93m'
+CBLUE2 = '\33[94m'
+CVIOLET2 = '\33[95m'
+CCYAN = '\33[96m'
+CGRAYL = '\33[97m'
+
+CGREYBG = '\33[100m'
+CREDBG2 = '\33[101m'
+CGREENBG2 = '\33[102m'
+CYELLOWBG2 = '\33[103m'
+CBLUEBG2 = '\33[104m'
+CVIOLETBG2 = '\33[105m'
+CBEIGEBG2 = '\33[106m'
+CWHITEBG2 = '\33[107m'
+
 def print_red(s):
     """Prints s in red"""
-    print("\033[91m{}\033[00m" .format(s))
+    print("{}{}{}".format(CRED2, s, CEND))
 
 def print_green(s):
     """Prints s in green"""
-    print("\033[92m{}\033[00m" .format(s))
+    print("{}{}{}".format(CGREEN2, s, CEND))
 
 def print_yellow(s):
     """Prints s in yellow"""
-    print("\033[93m{}\033[00m" .format(s))
+    print("{}{}{}".format(CYELLOW2, s, CEND))
 
 def print_light_purple(s):
     """Prints s in light purple"""
-    print("\033[95m{}\033[00m" .format(s))
+    print("{}{}{}".format(CVIOLET2, s, CEND))
 
 def print_purple(s):
     """Prints s in purple"""
-    print("\033[35m{}\033[00m" .format(s))
+    print("{}{}{}".format(CVIOLET, s, CEND))
 
 def print_cyan(s):
     """Prints s in cyan"""
-    print("\033[96m{}\033[00m" .format(s))
+    print("{}{}{}" .format(CCYAN, s, CEND))
 
 def print_light_gray(s):
     """Prints s in light gray"""
-    print("\033[97m{}\033[00m" .format(s))
+    print("{}{}{}".format(CGRAYL, s, CEND))
 
-def print_black(s):
-    """Prints s in black"""
-    print("\033[98m{}\033[00m" .format(s))
+def print_line():
+    print_cyan('-'*85)
+
+def print_double():
+    print_cyan('='*85)
 
 def print_intro(team, hw, part):
-    """Prints the intro banner for the grading script"""
-    print_cyan("="*85)
-    print("\033[96m{}\033[00m \033[95m{}\033[00m \033[96m {}\033[00m \033[95m{}"
-          "\033[96m  {}\033[00m \033[95m{}\033[00m".format("Team:", team,
-                                                           "HW:", hw,
-                                                           "Rubric Table:",
-                                                           part))
-    print_cyan("="*85)
+    print_double()
+    print(f"{CCYAN}Team:{CEND} {CVIOLET2}{team}{CEND}  {CCYAN}HW:{CEND} "\
+          f"{CVIOLET2}{hw}{CEND}  {CCYAN}Rubric Table:{CEND} {CVIOLET2}{part}{CEND}")
+    print_double()
+
+def print_outro(table_item):
+    print_line()
+    print_green("End test of {}".format(table_item))
+    print_double()
