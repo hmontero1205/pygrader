@@ -149,7 +149,8 @@ disable=print-statement,
         missing-function-docstring,
         bad-continuation,
         W0311,
-        no-else-return
+        no-else-return,
+        too-many-locals
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
