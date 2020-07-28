@@ -17,7 +17,7 @@ will also be stored here. The directory will look like this (for hw1):
 \_ .grade/
     \_ hw1/
        \_ .grades.json
-       \_ .deadline
+       \_ .deadline.txt
        \_ uni1/
           \_ uni1.tgz
        \_ uni2/
