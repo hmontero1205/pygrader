@@ -80,8 +80,9 @@ def print_double():
 
 def print_intro(team, hw, part):
     print_double()
-    print(f"{CCYAN}Team:{CEND} {CVIOLET2}{team}{CEND}  {CCYAN}HW:{CEND} "\
-          f"{CVIOLET2}{hw}{CEND}  {CCYAN}Rubric Table:{CEND} {CVIOLET2}{part}{CEND}")
+    print(f"{CCYAN}Team:{CEND} {CVIOLET2}{team}{CEND}  {CCYAN}HW:{CEND} "
+          f"{CVIOLET2}{hw}{CEND}  {CCYAN}Rubric Code:{CEND} "
+          f"{CVIOLET2}{part}{CEND}")
     print_double()
 
 def print_outro(table_item):

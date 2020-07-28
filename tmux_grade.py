@@ -9,7 +9,8 @@ import libtmux
 def main(hw, student, table):
 
     serever = libtmux.Server()
-    session = serever.new_session(session_name="Grade HW", kill_session=True, attach=False)
+    session = serever.new_session(session_name="Grade HW", kill_session=True,
+                                  attach=False)
     window = session.new_window(attach=True, window_name="Grade HW")
     main_pane = window.attached_pane
     other_pane = window.split_window(vertical=False)

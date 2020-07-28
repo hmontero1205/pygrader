@@ -11,7 +11,7 @@
 
 This will create a dir called `.grade/` in your `HOME` dir. In addition to
 serving as the workspace for grading submissions, grades and the hw deadline
-will also be stored here. The directory will look like this:
+will also be stored here. The directory will look like this (for hw1):
 ```
 ~
 \_ .grade/
@@ -19,34 +19,50 @@ will also be stored here. The directory will look like this:
        \_ .grades.json
        \_ .deadline
        \_ uni1/
+          \_ uni1.tgz
        \_ uni2/
+          \_ uni2.tgz
        |
        |
-       \_ uni3/
+       \_ uniN/
+          \_ uniN.tgz
 ```
 
 ## Running the grading script
 ```
-Usage: grade.py [-h]
-              [--amend | --continue | --grade-only | --regrade | --test-only]
-              hw student table
+usage: grade.py [-h] [-c [CODE]] [-g | -t] [-r | -d] hw [student]
 
-Entry point to grade OS HWs
+OS HW Grading Framework
 
 positional arguments:
-  hw            homework # to grade
-  student       the name of student/group to grade
-  table         table to grade
+  hw                    homework # to grade
+  student               the name of student/group to grade
 
 optional arguments:
-  -h, --help    show this help message and exit
-  --amend       Amend comment without rerunning test for that item
-  --continue    Continue from last graded item
-  --grade-only  Grade without running any tests
-  --regrade     Regrade an item
-  --test-only   Run tests without grading
+  -h, --help            show this help message and exit
+  -c [CODE], --code [CODE]
+                        rubric item (e.g. A, B4) to grade; defaults to all
+  -g, --grade-only      grade without running any tests
+  -t, --test-only       run tests without grading
+  -r, --regrade         do not skip previously graded items
+  -d, --dump-grades     dump grades for this homework -- all if no student
+                        specified
 ```
 
-NOTES
-- amend hasn't been implemented
-- regrade might be redundant
+# Tips
+- Simply running `./grade.py <hw> <student>` will run through the entire rubric
+  and skip any previously graded items.
+- If a submission crashes the grader/VM, restart and run
+  `./grade.py --grade-only <hw> <student> <item that crashed>`. This will
+  allow you to assign points/comments to that rubric item without rerunning the
+  problematic tests.
+- There are a few modes for dumping grades. Below are some examples. The first
+  mode can be used for getting a tsv-string to copy-paste into a spreadsheet.
+  The other modes can be used for reference (e.g. average grade for particular
+  rubric item).
+    - `./grade.py --dump <hw>`: all grades with late penalty applied.
+    - `./grade --dump <hw> --code=<code>`: all grades for rubric item `code`
+    - `./grade --dump <hw> <student> --code=<code>`: student's grades for
+      rubric item `code`.
+
+ 

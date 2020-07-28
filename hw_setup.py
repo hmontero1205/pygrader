@@ -1,17 +1,12 @@
 #!/usr/bin/python3
-"""
-setting up the hw dir by first creating a .grade/ in $HOME and subdir for each
-hw
-"""
+"""hw_setup.py: Prepares grading enviorment"""
 import argparse
 import sys
 import os
-import pickle
 import shutil
 import tarfile
 from pathlib import Path
 from datetime import datetime
-from pytz import timezone
 
 def create_dir(name):
     """Wrapper around mkdir"""
@@ -25,37 +20,42 @@ def create_dir(name):
             print(f"Successfully created the directory {name}")
 
 def record_deadline():
-    """Reads in a deadline, localizes it to NYC time, and serializes it"""
-    # Takes into account DST
-    nyc_tz = timezone("America/New_York")
+    """Reads in a deadline and stores it"""
+    while True:
+        try:
+            raw_deadline = input("Soft deadline (MM/DD/YY HH:MM AM/PM): ")
+            # Let's make sure it actually parses
+            _ = datetime.strptime(raw_deadline, "%m/%d/%y %I:%M %p")
+            break
+        except ValueError as _:
+            print("Incorrect format!")
 
-    raw_deadline = datetime.strptime(input("Soft deadline (MM/DD/YY HH:MM AM/PM): "),
-            "%m/%d/%y %I:%M %p")
-
-    # Add 59 seconds for precision, add NY time for tzinfo
-    deadline = nyc_tz.localize(raw_deadline.replace(second=59, tzinfo=None))
-
-    # Write the deadline datetime obj to ~.grade/hwN/.deadline
-    with open(".deadline", "wb") as d:
-        pickle.dump(deadline, d)
+    # Write the deadline to ~.grade/hwN/.deadline.txt
+    with open(".deadline.txt", "w") as d:
+        d.write(raw_deadline)
 
 def main():
     """Prompts for homework deadline and prepares submissions for grading"""
     parser = argparse.ArgumentParser()
 
     parser.add_argument("hw", type=str, help="the hw to setup (e.g. hw1)")
-    parser.add_argument("--submissions", dest="submissions", type=str,
+    parser.add_argument("-s", "--submissions", dest="submissions", type=str,
             help="path to tgz file containing all hw1 submissions")
     args = parser.parse_args()
+
+    s_path = os.path.abspath(args.submissions) if args.submissions else None
 
     root = os.path.join(Path.home(), '.grade')
     create_dir(root)
 
     os.chdir(root)
     if args.hw == 'hw1':
-        if not args.submissions or (not os.path.isfile(args.submissions) or
-                not tarfile.is_tarfile(args.submissions)):
-            raise ValueError("please provide a valid tar file")
+        if not s_path:
+            sys.exit("hw1 usage: ./hw_setup hw1 -s <submission tarball path>")
+        if not args.submissions or (not os.path.isfile(s_path) or
+                not tarfile.is_tarfile(s_path)):
+            sys.exit(f"Please provide a valid tarball. "
+                     f"Couldn't read file at {s_path}!")
 
         if os.path.isdir("hw1"):
             res = input("HW1 is already set up. Overwrite? [Y/n]: ")
@@ -65,7 +65,7 @@ def main():
 
             shutil.rmtree("hw1")
 
-        shutil.copy(args.submissions, "./hw1.tgz")  # TODO: should I use os.path.join?
+        shutil.copy(s_path, "./hw1.tgz")  # TODO: should I use os.path.join?
         with tarfile.open("hw1.tgz", "r:gz") as tar:
             # This will create the hw1 directory assuming the tarball was made
             # out of a dir called hw1 xD

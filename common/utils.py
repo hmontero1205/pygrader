@@ -123,6 +123,13 @@ def insert_mod(mod, kedr=True):
     else:
         p.print_green("[ OK ]")
 
+def remove_mod_silent(mod, kedr=True):
+    subprocess.run(RMMOD.format(mod).split(), stdout=subprocess.DEVNULL,
+                   stderr=subprocess.STDOUT)
+    if kedr:
+        subprocess.run(KEDR_STOP.format(mod).split(), stdout=subprocess.DEVNULL,
+                       stderr=subprocess.STDOUT)
+
 
 def remove_mod(mod, dmesg=True, kedr=True):
     """Performs module removal
