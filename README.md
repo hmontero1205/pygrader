@@ -61,8 +61,8 @@ optional arguments:
   The other modes can be used for reference (e.g. average grade for particular
   rubric item).
     - `./grade.py --dump <hw>`: all grades with late penalty applied.
-    - `./grade --dump <hw> --code=<code>`: all grades for rubric item `code`
-    - `./grade --dump <hw> <student> --code=<code>`: student's grades for
+    - `./grade.py --dump <hw> --code=<code>`: all grades for rubric item `code`
+    - `./grade.py --dump <hw> <student> --code=<code>`: student's grades for
       rubric item `code`.
 
  
