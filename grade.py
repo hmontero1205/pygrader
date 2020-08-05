@@ -82,7 +82,7 @@ class Grader():
 
         signal.signal(signal.SIGINT, self.hw_class.signal_handler)
 
-        self.grades_file = os.path.join(self.hw_class.root, ".grades.json")
+        self.grades_file = os.path.join(self.hw_class.root, "grades.json")
         self.grades = Grades(self.grades_file, self.hw_class.rubric,
                              self.student)
 
@@ -102,9 +102,9 @@ class Grader():
         p.print_double()
 
     def print_desc(self, section):
-        for i, d in enumerate(section.desc):
+        for i, (pts, desc) in enumerate(section.desc, 1):
             p.print_light_purple("{}.{} ({}p): {}".format(section.table_item,
-                i+1, d[0], d[1]))
+                                                          i, pts, desc))
 
     def ask_action(self):
         p.print_yellow("Run test again (a)")
@@ -128,30 +128,40 @@ class Grader():
         else:
             return False
 
-    def print_section_grade(self, section):
-        if self.grades.is_graded(section.table_item):
+    def print_section_grade(self, code):
+        if self.grades.is_graded(code):
             # We've graded this already. Let's show the current grade.
-            pts = self.grades[section.table_item]["points"]
-            cmts = self.grades[section.table_item]["comments"]
-            p.print_green(f"[ Previous Grade: points={pts}  comments='{cmts}']")
+            awarded = self.grades[code]["award"]
+            comments = self.grades[code]["comments"]
+            p.print_green(f"[ Previous Grade: awarded={awarded} "
+                          f"comments='{comments}']")
 
     def prompt_grade(self, section):
         """Prompts the TA for pts/comments"""
-
-        while True:
-            try:
-                pts = int(input("{}{} ({}p): {}".format(p.CBLUE2,
-                    section.table_item,
-                    sum(x[0] for x in section.desc), p.CEND)))
-                break
-            except (ValueError, EOFError) as e:
-                if isinstance(e, EOFError):
+        # self.print_desc(section)
+        for i, (pts, desc) in enumerate(section.desc, 1):
+            subitem_code = f"{section.table_item}.{i}"
+            p.print_light_purple(f"{subitem_code} ({pts}p): {desc}")
+            self.print_section_grade(subitem_code)
+            while True:
+                try:
+                    award = input(f"{p.CBLUE2}Award? [y/n]: {p.CEND}")
+                    if award in ('y', 'n'):
+                        break
+                except EOFError as _:
                     print("^D")
-                continue
+                    continue
+            while True:
+                try:
+                    comments = input(f"{p.CBLUE2}Comments: {p.CEND}")
+                    break
+                except EOFError as _:
+                    print("^D")
+                    continue
 
-        self.grades[section.table_item]["points"] = pts
-        cmts = input(f"{p.CBLUE2}Comments: {p.CEND}")
-        self.grades[section.table_item]["comments"] = cmts
+            self.grades[subitem_code]["award"] = (award == 'y')
+            self.grades[subitem_code]["comments"] = comments
+
         self.grades.synchronize()
 
     def grade(self):
@@ -188,7 +198,7 @@ class Grader():
 
     def grade_section(self, section):
         if (not self.env["regrade"]
-            and self.grades.is_graded(section.table_item)):
+            and self.grades.is_graded(f"{section.table_item}.1")):
             p.print_yellow(
                     f"[ {section.table_item} has been graded, skipping... ]")
             return
@@ -208,8 +218,8 @@ class Grader():
             is_late = self.hw_class.check_late_submission()
             if is_late:
                 self.grades.set_late(True)
-            self.print_desc(section)
-            self.print_section_grade(section)
+            # self.print_desc(section)
+            # self.print_section_grade(section)
             self.prompt_grade(section)
             print()
         else:

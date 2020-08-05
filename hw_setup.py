@@ -30,8 +30,8 @@ def record_deadline():
         except ValueError as _:
             print("Incorrect format!")
 
-    # Write the deadline to ~.grade/hwN/.deadline.txt
-    with open(".deadline.txt", "w") as d:
+    # Write the deadline to ~.grade/hwN/deadline.txt
+    with open("deadline.txt", "w") as d:
         d.write(raw_deadline)
 
 def main():

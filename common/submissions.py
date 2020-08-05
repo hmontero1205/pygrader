@@ -9,7 +9,7 @@ def check_late(deadline_path, iso_timestamp):
 
     Arguments:
         deadline_path: Location of the recorded assignment deadline
-            (e.g. ~/.grade/hw1/.deadline.txt)
+            (e.g. ~/.grade/hw1/deadline.txt)
         iso_timestamp: The ISO timestamp to compare against deadline
             (e.g. git log -n 1 --format='%aI')
     """
