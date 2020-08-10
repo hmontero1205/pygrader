@@ -12,6 +12,8 @@ import common.printing as p
 from common.grades import Grades
 from hw1.hw1 import HW1, HW1_ALIASES
 
+GRADES_FILE = "./grade.json"
+
 def main():
     """Entry-point into the grader"""
     parser = argparse.ArgumentParser(description="OS HW Grading Framework")
@@ -164,6 +166,23 @@ class Grader():
 
         self.grades.synchronize()
 
+    def _check_valid_table(self, table_key):
+        """Given a key (i.e A, C, N) check if its a valid rubric table"""
+
+        keys = [*self.hw_class.rubric.keys()]
+        if table_key not in keys:
+            raise ValueError(f"{self.hw} does not have table {table_key}")
+
+    def _check_valid_item(self, item_key):
+        """Given a table item (i.e. A1, B2, D9) check if it is valid.
+
+        Assumes the table is valid (use _check_valid_table() for validation on
+        that).
+        """
+        keys = [*self.hw_class.rubric[item_key[0]].keys()]
+        if item_key not in keys:
+            raise ValueError(f"{self.hw} does not have rubric item {item_key}")
+
     def grade(self):
         # The intro should be modified to account for when we grade all vs.
         # one section vs. one table
@@ -173,11 +192,16 @@ class Grader():
             self.grade_all()
         elif key.isalpha():
             # e.g. A, B, C, ...
-            self.grade_table(key)
+            table = key.upper()
+            self._check_valid_table(table)
+            self.grade_table(table)
         else:
             # e.g. A1, B4, ...
-            table = key[0]
-            section = self.hw_class.rubric[table][key]
+            table = key[0].upper()
+            item = key.upper()
+            self._check_valid_table(table)
+            self._check_valid_item(item)
+            section = self.hw_class.rubric[table][item]
             self.grade_section(section)
 
     def grade_all(self):
@@ -185,11 +209,6 @@ class Grader():
             self.grade_table(table)
 
     def grade_table(self, table_key):
-
-        table_keys = [*self.hw_class.rubric.keys()]
-
-        if table_key not in table_keys:
-            return 0
 
         table = self.hw_class.rubric[table_key]
 
