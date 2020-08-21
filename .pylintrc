@@ -151,7 +151,8 @@ disable=print-statement,
         W0311,
         no-else-return,
         too-many-locals,
-        too-many-branches
+        too-many-branches,
+        duplicate-code
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
