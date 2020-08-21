@@ -7,6 +7,10 @@ import shutil
 import tarfile
 from pathlib import Path
 from datetime import datetime
+from git import Repo
+from common import printing
+
+GITHUB_HW_ORG = "cs4118-hw"
 
 def create_dir(name):
     """Wrapper around mkdir"""
@@ -34,6 +38,25 @@ def record_deadline():
     with open("deadline.txt", "w") as d:
         d.write(raw_deadline)
 
+def _prompt_overwrite(hw_name: str, hw_path: str):
+    while True:
+        try:
+            res = input(f"{hw_name} is already set up. Overwrite? [y/n]: ")
+        except EOFError:
+            print("^D")
+        if res == "n":
+            print(f"Ready to grade {hw_name}!")
+            sys.exit()
+        elif res == "y":
+            break
+
+    shutil.rmtree(hw_path)
+
+def _clone_via_ssh(repo_name):
+    repo = f"{GITHUB_HW_ORG}/{repo_name}"
+    printing.print_purple(f"[ Cloning {repo}... ]")
+    Repo.clone_from(f"git@github.com:{repo}.git", repo_name)
+
 def main():
     """Prompts for homework deadline and prepares submissions for grading"""
     parser = argparse.ArgumentParser()
@@ -49,7 +72,7 @@ def main():
     create_dir(root)
 
     os.chdir(root)
-    if args.hw == 'hw1':
+    if args.hw in ('hw1', 'linux-list'):
         if not s_path:
             sys.exit("hw1 usage: ./hw_setup hw1 -s <submission tarball path>")
         if not args.submissions or (not os.path.isfile(s_path) or
@@ -58,12 +81,7 @@ def main():
                      f"Couldn't read file at {s_path}!")
 
         if os.path.isdir("hw1"):
-            res = input("HW1 is already set up. Overwrite? [Y/n]: ")
-            if res != "Y":
-                print(f"Ready to grade {args.hw}!")
-                sys.exit()
-
-            shutil.rmtree("hw1")
+            _prompt_overwrite(args.hw, "hw1")
 
         shutil.copy(s_path, "./hw1.tgz")  # TODO: should I use os.path.join?
         with tarfile.open("hw1.tgz", "r:gz") as tar:
@@ -87,8 +105,16 @@ def main():
                 create_dir(uni)
                 shutil.move(fname, os.path.join(uni, f"{uni}.tgz"))
 
-    elif args.hw == 'hw3':
-        pass
+    elif args.hw in ('hw3', 'multi-server'):
+        if os.path.isdir("hw3"):
+            _prompt_overwrite(args.hw, "hw3")
+
+        # Creates .grade/hw3 if it isn't there or if we want to overwrite.
+        create_dir("hw3")
+
+        os.chdir("hw3")
+
+        _clone_via_ssh("hw3")
     else:
         pass
 

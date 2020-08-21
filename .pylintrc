@@ -152,6 +152,9 @@ disable=print-statement,
         no-else-return,
         too-many-locals,
         too-many-branches,
+        attribute-defined-outside-init,
+        invalid-name,
+        anomalous-backslash-in-string,
         duplicate-code
 
 # Enable the message, report, category or checker with the given id(s). You can
@@ -337,7 +340,7 @@ inlinevar-naming-style=any
 #inlinevar-rgx=
 
 # Naming style matching correct method names.
-method-naming-style=snake_case
+#method-naming-style=snake_case
 
 # Regular expression matching correct method names. Overrides method-naming-
 # style.

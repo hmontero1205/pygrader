@@ -85,6 +85,11 @@ def print_intro(team, hw, part):
           f"{CVIOLET2}{part}{CEND}")
     print_double()
 
+def print_between_cyan_line(msg):
+    print_line()
+    print_cyan(msg)
+    print_line()
+
 def print_outro(table_item):
     print_line()
     print_green("End test of {}".format(table_item))

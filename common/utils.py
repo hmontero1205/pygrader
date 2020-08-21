@@ -25,8 +25,8 @@ def cmd_popen(cmd):
                      universal_newlines=True)
     return prc
 
-def cmd_run(cmd):
-    subprocess.run(cmd, shell=True)
+def cmd_run(cmd, silent=False):
+    subprocess.run(cmd, shell=True, capture_output=silent)
 
 def is_dir(path):
     """Checks if path is a directory"""
@@ -85,10 +85,16 @@ def grep_file(fname, pattern):
 
     subprocess.run(pattern, shell=True)
 
-def inspect_file(fname):
+def inspect_file(fname, grep=None):
     """Opens fname in less"""
     name = get_file(fname)
-    subprocess.run("bat {}".format(name), shell=True)
+    bat_str = f"bat --color=always {name}"
+    grep_str = f"grep --color=always -E '^|{grep}'| less -R"
+    if grep:
+        cmd = f"{bat_str} | {grep_str}"
+    else:
+        cmd = f"bat {fname}"
+    subprocess.run(cmd, shell=True)
 
 def compile_code():
     """Compiles the current directory (either with Make or manually)"""

@@ -2,6 +2,7 @@
 
 from datetime import datetime, timedelta
 from pytz import timezone
+from git import Repo
 import common.printing as printing
 
 def check_late(deadline_path, iso_timestamp):
@@ -40,3 +41,7 @@ def check_late(deadline_path, iso_timestamp):
                        f"{hrs} hrs, {mins} mins, "
                        f"and {secs} secs late")
     return True
+
+def checkout_to_team_tag(_repo: Repo, _team: str, _tag: str) -> bool:
+    # TODO: this function will handle checkout logic for hw3-8
+    pass

@@ -1,4 +1,8 @@
 [![pylint](https://github.com/cs4118/new_grading_scripts/workflows/pylint/badge.svg)](https://github.com/cs4118/new_grading_scripts/actions?query=workflow%3Apylint)
+
+# pygrader
+Grading infrastructure for Jae's COMS 4118, primarily written in Python.
+
 # Guide
 
 ## Setting up the env
@@ -65,4 +69,5 @@ optional arguments:
     - `./grade.py --dump <hw> <student> --code=<code>`: student's grades for
       rubric item `code`.
 
- 
+# Acknowledgement
+- Written by Dave and Hans in Summer 2020

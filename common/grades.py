@@ -161,7 +161,12 @@ class Grades():
                     if (((raw_pts and section.startswith("A"))
                         or (not raw_pts and not section.startswith("A"))) or
                             ta_comments):
-                        item_comments += f"({code})"
+
+                        # If a section only has one item, print A2 instead of
+                        # A2.1 since that's how we stylize our rubrics.
+                        pretty_code_name = (section if len(item.desc) == 1
+                                            else code)
+                        item_comments += f"({pretty_code_name})"
 
                     if ta_comments:
                         item_comments += f" {ta_comments}"
@@ -169,6 +174,9 @@ class Grades():
                     if item_comments:
                         all_comments.append(item_comments)
 
+        # We assume that if the TA wants ALL submission grades, that they'll
+        # also want to apply late penalities (they're about to finalize grades).
+        # Otherwise, we just just dump raw grades for reference.
         if rubric_code == "ALL" and self.is_late(name):
             all_comments.insert(0, "(LATE)")
         concatted_comments = "; ".join(all_comments)

@@ -11,6 +11,9 @@ import subprocess
 import common.printing as p
 from common.grades import Grades
 from hw1.hw1 import HW1, HW1_ALIASES
+from hw3.hw3 import HW3, HW3_ALIASES
+
+GRADES_FILE = "./grade.json"
 
 GRADES_FILE = "./grade.json"
 
@@ -63,6 +66,9 @@ def main():
     p.print_light_purple("\n[ Pretty-printing pts/comments up until now... ]")
     tester.grades.print_submission_grades()
 
+    # clean up
+    tester.hw_class.cleanup()
+
 class Grader():
     """Represents the current hw grading session
 
@@ -91,6 +97,8 @@ class Grader():
     def _get_hw_class(self):
         if self.hw.lower() in HW1_ALIASES:
             return HW1(self.student)
+        elif self.hw.lower() in HW3_ALIASES:
+            return HW3(self.student)
         else:
             sys.exit(f"Unsupported assignment: {self.hw}")
 
