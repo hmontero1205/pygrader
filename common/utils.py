@@ -25,8 +25,9 @@ def cmd_popen(cmd):
                      universal_newlines=True)
     return prc
 
-def cmd_run(cmd, silent=False):
-    subprocess.run(cmd, shell=True, capture_output=silent)
+def run_cmd(cmd, silent=False) -> int:
+    """Runs cmd in a shell and returns the status code."""
+    return subprocess.run(cmd, shell=True, capture_output=silent).returncode
 
 def is_dir(path):
     """Checks if path is a directory"""
@@ -85,12 +86,13 @@ def grep_file(fname, pattern):
 
     subprocess.run(pattern, shell=True)
 
-def inspect_file(fname, grep=None):
-    """Opens fname in less"""
+def inspect_file(fname, pattern=None):
+    """Opens fname in less, optionally greps for a pattern first."""
     name = get_file(fname)
     bat_str = f"bat --color=always {name}"
-    grep_str = f"grep --color=always -E '^|{grep}'| less -R"
-    if grep:
+    grep_str = (f"GREP_COLORS='ms=01;91;107' grep --color=always "
+                f"-E '^|{pattern}' | less -R")
+    if pattern:
         cmd = f"{bat_str} | {grep_str}"
     else:
         cmd = f"bat {fname}"
@@ -158,3 +160,27 @@ def remove_mod(mod, dmesg=True, kedr=True):
     if dmesg:
         p.print_cyan("[ Dumping kernel log buffer... ]")
         os.system(DMESG)
+
+def compare_values(observed: int, expected: int, desc: str,
+                   silent: bool = False) -> bool:
+    """Compares two values and (optionally) prints comparison results.
+
+    Args:
+        observed: Value observed
+        expected: Expected value
+        desc: The name of what we're comparing
+        silent: Whether or not to print results.
+
+    Returns:
+        bool representing whether or not the values were the same.
+    """
+    if observed == expected:
+        if not silent:
+            p.print_green(f"[ OK: Got {observed}/{expected} {desc} ]")
+
+        return True
+
+    if not silent:
+        p.print_red(f"[ FAIL: Got {observed}/{expected} {desc} ]")
+
+    return False
