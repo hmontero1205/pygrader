@@ -2,6 +2,8 @@
 import os
 import subprocess
 
+from typing import Callable, Dict, Optional, List
+
 import common.printing as p
 
 KEDR_START = "sudo kedr start {}"
@@ -25,9 +27,9 @@ def cmd_popen(cmd):
                      universal_newlines=True)
     return prc
 
-def run_cmd(cmd, silent=False) -> int:
+def run_cmd(cmd, silent=False, shell=True) -> int:
     """Runs cmd in a shell and returns the status code."""
-    return subprocess.run(cmd, shell=True, capture_output=silent).returncode
+    return subprocess.run(cmd, shell=shell, capture_output=silent).returncode
 
 def is_dir(path):
     """Checks if path is a directory"""
@@ -37,6 +39,10 @@ def is_dir(path):
 def file_exists(fname):
     """Checks if fname is a file"""
     return os.path.isfile(fname)
+
+def dir_exists(dir_path: str) -> bool:
+    """Checks if dir_path exists (and is a directory)."""
+    return os.path.isdir(dir_path)
 
 def prompt_file_name():
     """Prompts the user for a file to open"""
@@ -97,6 +103,36 @@ def inspect_file(fname, pattern=None):
     else:
         cmd = f"bat {fname}"
     subprocess.run(cmd, shell=True)
+
+def inspect_directory(files: List[str], pattern: Optional[str] = None,
+                      banner_fn: Optional[Callable] = None):
+    """Prompt the user for which file to inspect with optional pattern.
+
+    Args:
+        files: List of files in the current directory
+            (as reported by os.listdir(os.getcwd())).
+        pattern: Optional pattern to highlight in the files.
+        banner_fn: Optional function to call before presenting choices
+            (used to print some sort of banner).
+    """
+    while True:
+        if banner_fn:
+            banner_fn()
+        for i, file in enumerate(files):
+            p.print_yellow("({}) {}".format(i + 1, file))
+        p.print_yellow(f"({len(files) + 1}) "
+                       f"{p.CVIOLET2}exit{p.CEND}")
+        try:
+            choice = int(input(f"{p.CBLUE2}Choice: {p.CEND}"))
+        except (ValueError, EOFError):
+            continue
+
+        if 0 < choice <= len(files):
+            inspect_file(files[choice - 1], pattern)
+        elif choice == len(files) + 1:
+            break
+        else:
+            continue
 
 def compile_code():
     """Compiles the current directory (either with Make or manually)"""
@@ -184,3 +220,65 @@ def compare_values(observed: int, expected: int, desc: str,
         p.print_red(f"[ FAIL: Got {observed}/{expected} {desc} ]")
 
     return False
+
+def run_and_prompt(f: Callable):
+    """Runs f and then prompts for rerun/shell/continue."""
+    while True:
+        f()
+        p.print_line()
+        p.print_yellow("Run test again (a)")
+        p.print_yellow("Open shell & run again (s)")
+        p.print_yellow("Continue (enter)")
+
+        while True:
+            try:
+                usr_input = input(f"{p.CBLUE2}Enter an action [a|s]:  {p.CEND}")
+                break
+            except EOFError as _:
+                print("^D")
+                continue
+
+        if usr_input == 'a':
+            continue
+        elif usr_input == 's':
+            p.print_red("^D/exit to end shell session")
+            os.system("bash")
+            continue
+        else:
+            break
+
+def run_and_prompt_multi(test_name_to_callable: Dict[str, Callable],
+                         banner_fn: Optional[Callable] = None,
+                         finish_msg: Optional[str] = None):
+    """Wraps run_and_prompt by offering multiple tests to run.
+
+    Args:
+        test_name_to_callable: Maps a test name to a function that executes that
+            test.
+        banner_fn: Optional function to execute before presenting choices
+            (used to print some sort of banner).
+        finish_msg: Optional message to print as the exit choice.
+    """
+    number_to_callable = dict(enumerate(test_name_to_callable.values()))
+    finish_msg = "Finish" if not finish_msg else finish_msg
+    while True:
+        if banner_fn:
+            banner_fn()
+        for i, test_name in enumerate(test_name_to_callable.keys()):
+            p.print_yellow("({}) {}".format(i + 1, test_name))
+        p.print_yellow(f"({len(number_to_callable) + 1}) "
+                       f"{p.CVIOLET2}{finish_msg}{p.CEND}")
+        try:
+            choice = int(input(f"{p.CBLUE2}Choice: {p.CEND}"))
+        except (ValueError, EOFError):
+            continue
+
+        if 0 < choice <= len(number_to_callable):
+            def tester_wrapper():
+                p.print_line()
+                number_to_callable[choice - 1]()
+            run_and_prompt(tester_wrapper)
+        elif choice == len(number_to_callable) + 1:
+            break
+        else:
+            continue

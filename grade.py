@@ -6,14 +6,12 @@ import os
 import sys
 import signal
 import argparse
-import subprocess
 
 import common.printing as p
+import common.utils as utils
 from common.grades import Grades
 from hw1.hw1 import HW1, HW1_ALIASES
 from hw3.hw3 import HW3, HW3_ALIASES
-
-GRADES_FILE = "./grade.json"
 
 GRADES_FILE = "./grade.json"
 
@@ -116,28 +114,6 @@ class Grader():
             p.print_light_purple("{}.{} ({}p): {}".format(section.table_item,
                                                           i, pts, desc))
 
-    def ask_action(self):
-        p.print_yellow("Run test again (a)")
-        p.print_yellow("Open shell & run again (s)")
-        p.print_yellow("Continue (enter)")
-
-        while True:
-            try:
-                usr_input = input(f"{p.CBLUE2}Enter an action [a|s]:  {p.CEND}")
-                break
-            except EOFError as _:
-                print("^D")
-                continue
-
-        if usr_input == 'a':
-            return True
-        elif usr_input == 's':
-            p.print_red("^D/exit to end shell session")
-            subprocess.run("bash", shell=True)
-            return True
-        else:
-            return False
-
     def print_section_grade(self, code):
         if self.grades.is_graded(code):
             # We've graded this already. Let's show the current grade.
@@ -230,14 +206,12 @@ class Grader():
                     f"[ {section.table_item} has been graded, skipping... ]")
             return
 
-        # if -g is not provided, run tests else skip tests
+        # if --grade-only/-g is not provided, run tests else skip tests
         if not self.env["grade_only"]:
-            run = True
-            while run:
+            def test_wrapper():
                 self.print_header(section)
                 section.tester()
-                p.print_line()
-                run = self.ask_action()
+            utils.run_and_prompt(test_wrapper)
 
         # if -t is not provided, ask for grade. If -t is provided skip
         if not self.env["test_only"]:
