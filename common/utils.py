@@ -1,6 +1,7 @@
 """utils.py: Grading helper functions"""
 import os
 import subprocess
+import shutil
 
 from typing import Callable, Dict, Optional, List
 
@@ -71,6 +72,22 @@ def get_file(fname):
     submission_name = prompt_file_name()
     p.print_red('‾'*85)
     return submission_name
+
+def concat_files(outfile, file_types):
+    if file_exists(outfile):
+        return outfile
+
+    with open(outfile, "w+") as o:
+        for fname in os.listdir():
+            if fname != outfile and fname[-2:] in file_types:
+                shutil.copyfileobj(open(fname, "r"), o)
+    return outfile
+
+def remove_file(fname):
+    if file_exists(fname):
+        os.remove(fname)
+    else:
+        p.print_red(f"[ OPPS - {fname} does not exist ]")
 
 def extract_between(fname, start, end=None):
     """Prints the text in fname that's in between start and end"""
