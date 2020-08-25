@@ -86,7 +86,7 @@ class Grader():
         self.env = env
         self.hw_class = self._get_hw_class()
 
-        signal.signal(signal.SIGINT, self.hw_class.signal_handler)
+        signal.signal(signal.SIGINT, self.hw_class.exit_handler)
 
         self.grades_file = os.path.join(self.hw_class.root, "grades.json")
         self.grades = Grades(self.grades_file, self.hw_class.rubric,

@@ -232,7 +232,7 @@ def run_and_prompt(f: Callable):
 
         while True:
             try:
-                usr_input = input(f"{p.CBLUE2}Enter an action [a|s]:  {p.CEND}")
+                usr_input = input(f"{p.CBLUE2}Enter an action [a|s]: {p.CEND}")
                 break
             except EOFError as _:
                 print("^D")

@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 """hw.py: Base class for all HW's"""
 
 import os
@@ -16,23 +14,22 @@ class HW():
     """Grading Base Class
 
     Attributes:
-        hw:         the hw subclass
-        root:       ~/.grade/hw{1,...,8} contains the grade_dir, deadline.txt,
-                    and grades.json
-        student:    the team/student to be graded
+        hw: the hw #
+        root: Path of the form '~/.grade/hw{1,...,8}', which contains the
+            grade_dir, deadline.txt, and grades.json
+        grade_dir: The student/team's submission directory.
     """
 
     def __init__(self, hw, root, rubric_file):
         self.hw = hw
         self.root = os.path.join(Path.home(), ".grade", root)
         self.rubric = self.create_rubric(rubric_file)
-        self.signal_handler = self.exit_handler
-        self.grade_dir = None
+        self.grade_dir = None  # Populated in subclasses.
 
     def create_rubric(self, rubric_file):
+        """Parses a JSON rubric file into a Python representation."""
 
         #TODO check if file exists
-
         with open(rubric_file, "r") as f:
             rubric_json = json.load(f)
 
@@ -42,6 +39,8 @@ class HW():
                 rubric[table_k] = {}
 
             for item in table_v:
+                # TODO: If the grade_* doesn't exist, should we link our generic
+                # grade() function?
                 ri_obg = RubricItem(
                             table_v[item]['name'],
                             list(zip(table_v[item]['points_per_subitem'],
@@ -51,13 +50,28 @@ class HW():
         return rubric
 
     def do_cd(self, path):
+        """Changes directory relative to the root of the student submission.
+
+        For example, if you had the following:
+            hw3
+            \_ part1
+               \_ part1-sub
+
+        and you wanted to cd into part1-sub, you would run
+        `do_cd(os.path.join('part1', 'part1-sub'))`.
+        """
         part_dir = os.path.join(self.grade_dir, path)
         u.is_dir(part_dir)
         os.chdir(part_dir)
 
     def exit_handler(self, _signal, _frame):
-        """Handler for SIGINT"""
-        printing.print_cyan("\n[ Exiting hw3 grader... ]")
+        """Handler for SIGINT
+
+        Note: this serves as a template for how the subclasses should do it.
+        The subclass is free to override this function with more hw-specific
+        logic.
+        """
+        printing.print_cyan("\n[ Exiting generic grader... ]")
         self.cleanup()
         sys.exit()
 
@@ -70,10 +84,13 @@ class HW():
                                iso_timestamp.strip('\n'))
 
     def grade(self):
-        print("this item is not implemented (should open shell)")
+        """Generic grade function."""
+        # TODO or should we raise NotImplementedError instead?
+        printing.print_red("[ Opening shell, ^D/exit when done. ]")
+        os.system("bash")
 
     def setup(self):
-        pass
+        """Performs submission setup (e.g. untar, git checkout tag)."""
 
     def cleanup(self):
-        pass
+        """Performs cleanup (kills stray processes, removes mods, etc.)."""
