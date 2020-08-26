@@ -12,6 +12,7 @@ import common.utils as utils
 from common.grades import Grades
 from hw1.hw1 import HW1, HW1_ALIASES
 from hw3.hw3 import HW3, HW3_ALIASES
+from hw4.hw4 import HW4, HW4_ALIASES
 
 GRADES_FILE = "./grade.json"
 
@@ -97,6 +98,8 @@ class Grader():
             return HW1(self.student)
         elif self.hw.lower() in HW3_ALIASES:
             return HW3(self.student)
+        elif self.hw.lower() in HW4_ALIASES:
+            return HW4(self.student)
         else:
             sys.exit(f"Unsupported assignment: {self.hw}")
 

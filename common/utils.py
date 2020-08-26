@@ -107,7 +107,7 @@ def grep_file(fname, pattern):
 
     pattern = pattern.format(fname=fname)
 
-    subprocess.run(pattern, shell=True)
+    return subprocess.run(pattern, shell=True)
 
 def inspect_file(fname, pattern=None):
     """Opens fname in less, optionally greps for a pattern first."""

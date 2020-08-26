@@ -105,16 +105,16 @@ def main():
                 create_dir(uni)
                 shutil.move(fname, os.path.join(uni, f"{uni}.tgz"))
 
-    elif args.hw in ('hw3', 'multi-server'):
-        if os.path.isdir("hw3"):
-            _prompt_overwrite(args.hw, "hw3")
+    elif args.hw in ('hw3', 'hw4'):
+        if os.path.isdir(args.hw):
+            _prompt_overwrite(args.hw, args.hw)
 
         # Creates .grade/hw3 if it isn't there or if we want to overwrite.
-        create_dir("hw3")
+        create_dir(args.hw)
 
-        os.chdir("hw3")
+        os.chdir(args.hw)
 
-        _clone_via_ssh("hw3")
+        _clone_via_ssh(args.hw)
     else:
         pass
 
