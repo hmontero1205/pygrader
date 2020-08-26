@@ -5,32 +5,60 @@ Grading infrastructure for Jae's COMS 4118, primarily written in Python.
 
 # Guide
 
-## Setting up the env
+## Setup
+Generally speaking, you run the following before beginning to grade an assignment: 
+```
+./hw_setup.py hwN
+```
 
-- Obtain `hw1.tgz` as follows:  Download the zipped submissions file from
-  Courseworks, unzip, and place all tarballs in a directory called `hw1`.
-  Then, make a tarball out of that. TODO: make this process better.
-
-- Run `./hw_setup.py hw1 -f {path to hw1.tgz}`
-
-This will create a dir called `.grade/` in your `HOME` dir. In addition to
-serving as the workspace for grading submissions, grades and the hw deadline
-will also be stored here. The directory will look like this (for hw1):
+This will create a dir called `.grade/` in your `HOME` directory. In addition to
+serving as the workspace for grading submissions, grades (awarded points & comments) and the hw deadline will  be stored here. The directory will look something like this:
 ```
 ~
 \_ .grade/
-    \_ hw1/
+    \_ hwN/
        \_ grades.json
        \_ deadline.txt
-       \_ uni1/
-          \_ uni1.tgz
-       \_ uni2/
-          \_ uni2.tgz
-       |
-       |
-       \_ uniN/
-          \_ uniN.tgz
+       \_ hwN
 ```
+
+For GitHub-based assignments, the `hwN` subdirectory will be a clone of the skeleton code and is used for pulling in submissions tags. For Canvas-based assignments, there will be a directory for each student (see [hw1/README.md](hw1/README.md) for more details).
+
+### grades.json
+This is a JSON representation of your grading progress for a given hw. It takes the following form:
+```
+{
+  "name1": {
+    "is_late": false,
+    "scores": {
+      "A1.1": {
+        "award": false,
+        "comments": "test didn't pass"
+      },
+      "A1.2": {
+        "award": null,
+        "comments": null
+      }
+    }
+  },
+  "name2": {
+    ...
+  }
+}
+
+```
+Each submission you grade will be recorded here. This file is updated as you grade. You can also manually update this file. Here's a breakdown of the fields:
+- `is_late` is a boolean indicating whether or not any part of the submission was submitted after the deadline (stored in `deadline.txt`). This is used to apply the late penalty when you run `./grade --dump hwN`. This field is updated by the grader if it finds that the submission is late.
+- `scores` maps a rubric subitem to its grading result. The `award` and `comments` start off as `null`, which means you haven't graded that subitem yet. When dumping grades, subitems that have `award = null` are not included.
+    - `award` is a boolean indicating whether or not the submission passed this test.
+    - `comments` is a text field for leaving comments for that item. When dumping grades, all comments (empty or not) are prepended with the subitem code. (e.g. (A1.1) test didn't pass).
+
+### deadline.txt
+This is a plain-text file that contains the deadline for the assignment. This date is written when running `hw_setup.py` but can also be manually updated later. For example:
+```
+02/02/20 11:59 PM
+```
+The grader will compare this date with the timestamp on the latest commit of the submission (or tag for Github-based assignments). The `is_late` field is set to `true` if the submission is late. The late penalty (defined in `common/submissions.py`) is then applied when dumping grades.
 
 ## Running the grading script
 ```
@@ -68,6 +96,14 @@ optional arguments:
     - `./grade.py --dump <hw> --code=<code>`: all grades for rubric item `code`
     - `./grade.py --dump <hw> <student> --code=<code>`: student's grades for
       rubric item `code`.
+
+# Repo Overview (TODO)
+This section provides a high-level explanation of the design for this grader. For specifics, we have tried to add comments in the code where needed. 
+## Rubrics and HW Classes
+## `grade.py`
+## `common/utils.py`
+## `submissions.py`
+## `printing.py`
 
 # Acknowledgement
 - Written by Dave and Hans in Summer 2020
