@@ -6,7 +6,7 @@ Grading infrastructure for Jae's COMS 4118, primarily written in Python.
 # Guide
 
 ## Setup
-Generally speaking, you run the following before beginning to grade an assignment: 
+Generally speaking, you run the following before beginning to grade an assignment:
 ```
 ./hw_setup.py hwN
 ```
@@ -53,6 +53,8 @@ Each submission you grade will be recorded here. This file is updated as you gra
     - `award` is a boolean indicating whether or not the submission passed this test.
     - `comments` is a text field for leaving comments for that item. When dumping grades, all comments (empty or not) are prepended with the subitem code. (e.g. (A1.1) test didn't pass).
 
+Note that we don't store numeric values for subitem grades here. By simply storing `true`/`false`, we are able to rescale grades without having to regrade. All you'd have to do to rescale an assignment is to update the `hwN/hwN_rubric.json` and then re-dump grades to make sure you have the updated numbers.
+
 ### deadline.txt
 This is a plain-text file that contains the deadline for the assignment. This date is written when running `hw_setup.py` but can also be manually updated later. For example:
 ```
@@ -68,7 +70,7 @@ OS HW Grading Framework
 
 positional arguments:
   hw                    homework # to grade
-  student               the name of student/group to grade
+  submitter             the name of student/group to grade
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -77,7 +79,7 @@ optional arguments:
   -g, --grade-only      grade without running any tests
   -t, --test-only       run tests without grading
   -r, --regrade         do not skip previously graded items
-  -d, --dump-grades     dump grades for this homework -- all if no student
+  -d, --dump-grades     dump grades for this homework -- all if no submitter
                         specified
 ```
 
@@ -97,13 +99,59 @@ optional arguments:
     - `./grade.py --dump <hw> <student> --code=<code>`: student's grades for
       rubric item `code`.
 
-# Repo Overview (TODO)
-This section provides a high-level explanation of the design for this grader. For specifics, we have tried to add comments in the code where needed. 
+# Repo Overview
+This section provides a high-level explanation of the design for this grader. For specifics, we have tried to add comments in the code where needed. Here's some terminology you'll see throughout the repo:
+- Rubric Table: Our rubrics are organized by tables (roughly mapping to each part of an assignment). Tables are denoted by 1 letter (A-Z).
+- Rubric Item: This is the granularity at which we run tests. A rubric item is denoted by a its table letter and a number (e.g. A1, C3). A rubric item may be composed of one or more subitems.
+- Rubric Subitem: This is the granularity at which we award points. For each test (rubric item), we usually have a few subitems. These are denoted by its corresponding item code followed by a number (e.g. A1.1, C3.2).
+- Grades: Super overloaded in this repo xD. Here, it means the actual grading record for a given submission (how many points were awarded and comments left by the TA).
 ## Rubrics and HW Classes
-## `grade.py`
+There are a few building blocks that make up the homework representation in this grader.
+### Rubric Files
+HW assignments have a corresponding rubric found in `hwN/hwN_rubric.json` that look something like this:
+```
+{
+    "B": {
+        "B1": {
+            "name": "B1",
+            "points_per_subitem": [
+                1,
+                2,
+                3
+            ],
+            "desc_per_subitem": [
+                "foo",
+                "bar",
+                "foobar"
+            ]
+        },
+        "B2": {
+            ...
+        }
+    },
+
+    "C": {
+      ...
+    }
+}
+```
+We see that each table code is mapped to a mapping from rubric item code to rubric item information. For each rubric item, we have its `name` , `points_per_subitem`, and `desc_per_subitem`. Again, we have test functions per rubric item (B1), but we grade per subitem (B1.1, B1.2, B1.3).
+
+
+### HW Base Class (`common/hw_base.py`).
+This is the base class that concrete hw instances will extend when instantiated. This class is mainly responsible for parsing the rubric JSON file and connecting RubricItems with their corresponding `grade_ItemCode()` function. These functions are defined by the concrete hw class. This class also provides some default/common functionality.
+### Concrete HW Classes (`hwN/hwN.py`)
+These classes extend the HW base class and actually implement the tester functions for each rubric item. This is where the core grading logic for each assignment lives.
+## `grade.py` (the Grader)
+The main entrypoint to the grading infrastructure. Here, the concrete hw class is instantiated and the grades JSON file is parsed. Then, as defined by the Grader command-line flags, rubric items' tester functions are called and the TA is prompted for points/comments (after each tester function). Grades are synchronized to the filesystem after each rubric item is graded. The Grader alternatively offers an easy way to pretty-print grades (via dump mode).
+## `common/grades.py`
+The Grades object exposes a minimal interface for the Grader to access/update a submission's grading progress. If the Grader is being run in dump mode, the Grades object is used to traverse through `grades.json` and pretty-print all the submissions' grades.
 ## `common/utils.py`
-## `submissions.py`
-## `printing.py`
+This library offers a bunch of functions that are often used in grading logic. We've tried to simplify common operations (compilation, value comparison, file inspection, etc.) into easy-to-use functions.
+## `common/submissions.py`
+This library contains logic related to our git/GitHub workflow. Our late submission detector and some tag/branch logic is stored here.
+## `common/printing.py`
+This library essentially wraps `print()` with colors. This is meant to be a little more flexible than some pylibrary like `termcolor`, although it might be worth looking into that.
 
 # Acknowledgement
 - Written by Dave and Hans in Summer 2020

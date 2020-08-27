@@ -4,9 +4,18 @@ grades.py: Logic for storing points/comments while grading
 import os
 import sys
 import json
+from typing import Set, Dict, Union, Optional, Tuple
+
 import common.utils as utils
 
 LATE_PENALTY = .2
+
+# Probably better to just look at a grades.json
+GradesDictType = Dict[str, # Submitter
+                      Dict[str, Union[bool, # is_late
+                                      Dict[str, # subitem_code
+                                           Dict[str, # award/comments
+                                                Union[bool, str]]]]]]
 
 class Grades():
     """Represents the grades for the current hw
@@ -14,35 +23,35 @@ class Grades():
     Attributes:
         grades_file: the JSON file with grades
         rubric: the rubric object for a given hw
-        submission_name: The uni/team we're currently grading
-        _grades: Maps submission_name -> (is_late, (item -> (pts, comments)))
+        submitter: The uni/team we're currently grading
+        _grades: Maps submitter -> (is_late, (item -> (pts, comments)))
     """
     def __init__(self, grades_file, rubric, name):
         self.grades_file = os.path.abspath(grades_file)
         self.rubric = rubric
-        self.submission_name = name
+        self.submitter = name
         self._grades = self.load_grades()
 
-        if self.submission_name and self.submission_name not in self._grades:
+        if self.submitter and self.submitter not in self._grades:
             # This is the first time grading the submission
             self.add_submission_entry()
         self.synchronize()
 
-    def _get_defined_rubric_items(self):
-        items = set()
+    def _get_defined_rubric_subitems(self) -> Set[str]:
+        subitems = set()
         for table_code in sorted(self.rubric.keys()):
-            for section_code in sorted(self.rubric[table_code].keys()):
-                item = self.rubric[table_code][section_code]
-                for sub_item in range(1, len(item.desc) + 1):
-                    code = f"{section_code}.{sub_item}"
-                    if code in items:
-                        sys.exit(f"Rubric item '{code}' defined twice!")
+            for item_code in sorted(self.rubric[table_code].keys()):
+                item = self.rubric[table_code][item_code]
+                for subitem_code in range(1, len(item.subitems) + 1):
+                    code = f"{item_code}.{subitem_code}"
+                    if code in subitems:
+                        sys.exit(f"Rubric subitem '{code}' defined twice!")
 
-                    items.add(code)
+                    subitems.add(code)
 
-        return items
+        return subitems
 
-    def load_grades(self):
+    def load_grades(self) -> GradesDictType:
         """Returns a dictionary representation of the TA's grades thus far"""
         if not utils.file_exists(self.grades_file):
             # The TA hasn't started grading this hw yet
@@ -53,40 +62,39 @@ class Grades():
 
         # Let's traverse over the rubric and make sure to adjust the dict if
         # anything has changed.
-        defined_items = self._get_defined_rubric_items()
+        defined_subitems = self._get_defined_rubric_subitems()
         for grade_info in grades.values():
             scores = grade_info["scores"]
-            present_items = set(scores.keys())
+            present_subitems = set(scores.keys())
 
-            for code in defined_items.symmetric_difference(present_items):
-                if code not in defined_items:
+            for code in defined_subitems.symmetric_difference(present_subitems):
+                if code not in defined_subitems:
                     scores.pop(code)
                     continue
 
-                assert code not in present_items
+                assert code not in present_subitems
                 scores[code] = {"award": None, "comments": None}
 
 
         return grades
 
-
     def add_submission_entry(self):
         """Create a new entry for student/team with null fields"""
-        self._grades[self.submission_name] = dict()
-        self._grades[self.submission_name]["is_late"] = False
+        self._grades[self.submitter] = dict()
+        self._grades[self.submitter]["is_late"] = False
         rubric_scores = dict()
         for table_code in sorted(self.rubric.keys()):
-            for section_code in sorted(self.rubric[table_code].keys()):
-                item = self.rubric[table_code][section_code]
-                for sub_item in range(1, len(item.desc) + 1):
-                    code = f"{section_code}.{sub_item}"
+            for item_code in sorted(self.rubric[table_code].keys()):
+                item = self.rubric[table_code][item_code]
+                for subitem_code in range(1, len(item.subitems) + 1):
+                    code = f"{item_code}.{subitem_code}"
                     # None means that it hasn't been graded yet
                     rubric_scores[code] = {"award": None, "comments": None}
-        self._grades[self.submission_name]["scores"] = rubric_scores
+        self._grades[self.submitter]["scores"] = rubric_scores
 
-    def __getitem__(self, rubric_item):
+    def __getitem__(self, rubric_subitem) -> Dict[str, Union[bool, str]]:
         """Wrapper around self._grades for convenience"""
-        return self._grades[self.submission_name]["scores"][rubric_item]
+        return self._grades[self.submitter]["scores"][rubric_subitem]
 
     def synchronize(self):
         """Write out the grades dictionary to the filesystem"""
@@ -94,30 +102,30 @@ class Grades():
             # Indent for pretty printing :^)
             json.dump(self._grades, f, indent=4, sort_keys=True)
 
-    def is_graded(self, code, name=None):
-        """Checks if an item has been graded yet"""
+    def is_graded(self, code: str, name: Optional[str] = None) -> bool:
+        """Checks if a subitem has been graded yet"""
         if not name:
-            name = self.submission_name
+            name = self.submitter
         # TODO: yikes, 4 dictionary accesses xD. is there a better way?
         return (self._grades[name]["scores"][code]["award"]
                 is not None)
 
-    def is_late(self, name=None):
+    def is_late(self, name: Optional[str] = None) -> bool:
         """Getter for is_late"""
         if not name:
-            name = self.submission_name
+            name = self.submitter
         return self._grades[name]["is_late"]
 
-    def set_late(self, opt):
+    def set_late(self, opt: bool):
         """Setter for is_late"""
-        self._grades[self.submission_name]["is_late"] = opt
+        self._grades[self.submitter]["is_late"] = opt
 
-    def dump_grades(self, submission_name, rubric_code):
+    def dump_grades(self, submitter: str, rubric_code: str):
         all_pts = 0
         graded_submissions = 0
 
-        if submission_name:
-            self.print_submission_grades(submission_name, rubric_code)
+        if submitter:
+            self.print_submission_grades(submitter, rubric_code)
         else:
             for name in self._grades:
                 is_graded, total_pts = self.print_submission_grades(name,
@@ -133,10 +141,22 @@ class Grades():
                   f"graded submission(s): {avg}")
 
 
-    def print_submission_grades(self, name=None, rubric_code=None):
-        """Prints (uni, pts, comments) in tsv format"""
+    def print_submission_grades(
+            self, name: Optional[str] = None,
+            rubric_code: Optional[str] = None) -> Tuple[bool, float]:
+        """Prints (uni, pts, comments) in tsv format
+
+        Returns:
+            A tuple with two members: a bool indicating whether or not this
+            submission was even graded yet and a float representing the total
+            score of this submission. If it hasn't been graded yet, this float
+            should be zero.
+
+            NOTE: We only apply the late penalty if the TA requested ALL grades
+            (such that rubric_code = 'ALL'.
+        """
         if not name:
-            name = self.submission_name
+            name = self.submitter
 
         if not rubric_code:
            rubric_code = "ALL"
@@ -146,25 +166,31 @@ class Grades():
         graded = False
         submission_scores = self._grades[name]["scores"]
 
-        for table_sections in self.rubric.values():
-            for section, item in table_sections.items():
-                if(rubric_code != "ALL" and not section.startswith(rubric_code)
-                   or not self.is_graded(f"{section}.1", name)):
+        for rubric_item_mappings in self.rubric.values():
+            for item_code, rubric_item in rubric_item_mappings.items():
+                if(rubric_code != "ALL"
+                   and not item_code.startswith(rubric_code)
+                   or not self.is_graded(f"{item_code}.1", name)):
                     continue
                 graded = True
-                for i, (pts, _) in enumerate(item.desc, 1):
-                    code = f"{section}.{i}"
+                for i, (pts, _) in enumerate(rubric_item.subitems, 1):
+                    code = f"{item_code}.{i}"
                     raw_pts = pts if submission_scores[code]["award"] else 0
                     total_pts += raw_pts
                     ta_comments = submission_scores[code]["comments"]
                     item_comments = ""
-                    if (((raw_pts and section.startswith("A"))
-                        or (not raw_pts and not section.startswith("A"))) or
+
+                    if (((raw_pts and item_code.startswith("A"))
+                        or (not raw_pts and not item_code.startswith("A"))) or
                             ta_comments):
+                        # Always print the code if points were not awarded for
+                        # a subitem. Table A is deductive points though, so
+                        # we prepend the code if it was awarded.
 
                         # If a section only has one item, print A2 instead of
                         # A2.1 since that's how we stylize our rubrics.
-                        pretty_code_name = (section if len(item.desc) == 1
+                        pretty_code_name = (item_code
+                                            if len(rubric_item.subitems) == 1
                                             else code)
                         item_comments += f"({pretty_code_name})"
 

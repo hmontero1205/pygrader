@@ -21,23 +21,24 @@ SED_BETWEEN = "sed -n '/{0}/,/{1}/{{/{1}/!p}}' {2}"
 # This template will extract all text in [start, EOF)
 SED_TO_END = "sed -n '/{0}/,$p' {1}"
 
-def cmd_popen(cmd):
+def cmd_popen(cmd: str) -> 'Process':
+    """Uses subprocess.Popen to run a command, returns the object."""
     prc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
                      stdout=subprocess.PIPE,
                      stderr=subprocess.STDOUT, close_fds=True,
                      universal_newlines=True)
     return prc
 
-def run_cmd(cmd, silent=False, shell=True) -> int:
-    """Runs cmd in a shell and returns the status code."""
+def run_cmd(cmd: str, silent: bool = False, shell: bool = True) -> int:
+    """Runs cmd and returns the status code."""
     return subprocess.run(cmd, shell=shell, capture_output=silent).returncode
 
-def is_dir(path):
+def is_dir(path: str):
     """Checks if path is a directory"""
     if not os.path.isdir(path):
         raise ValueError("{} is not a directory".format(path))
 
-def file_exists(fname):
+def file_exists(fname: str) -> bool:
     """Checks if fname is a file"""
     return os.path.isfile(fname)
 
@@ -45,7 +46,7 @@ def dir_exists(dir_path: str) -> bool:
     """Checks if dir_path exists (and is a directory)."""
     return os.path.isdir(dir_path)
 
-def prompt_file_name():
+def prompt_file_name() -> str:
     """Prompts the user for a file to open"""
     ls_output = os.listdir()
 
@@ -61,7 +62,7 @@ def prompt_file_name():
         if 0 < select <= len(ls_output):
             return ls_output[select-1]
 
-def get_file(fname):
+def get_file(fname: str) -> str:
     """Checks if fname is in pwd. If not, prompts grader with choices"""
     if file_exists(fname):
         return fname
@@ -73,7 +74,8 @@ def get_file(fname):
     p.print_red('‾'*85)
     return submission_name
 
-def concat_files(outfile, file_types):
+def concat_files(outfile: str, file_types: List[str]) -> str:
+    """Concats all relevant files in the cwd into 1 file called `outfile`."""
     if file_exists(outfile):
         return outfile
 
@@ -83,13 +85,13 @@ def concat_files(outfile, file_types):
                 shutil.copyfileobj(open(fname, "r"), o)
     return outfile
 
-def remove_file(fname):
+def remove_file(fname: str):
     if file_exists(fname):
         os.remove(fname)
     else:
         p.print_red(f"[ OPPS - {fname} does not exist ]")
 
-def extract_between(fname, start, end=None):
+def extract_between(fname: str, start: str, end: Optional[str] = None):
     """Prints the text in fname that's in between start and end"""
     if not end:
         sed_command = SED_TO_END.format(start, fname)
@@ -97,7 +99,7 @@ def extract_between(fname, start, end=None):
         sed_command = SED_BETWEEN.format(start, end, fname)
     os.system(sed_command)
 
-def grep_file(fname, pattern):
+def grep_file(fname: str, pattern: str) -> str:
     """Greps fname for pattern and prints the result
 
     TODO: this isn't actually being used as a grep.. it just wraps
@@ -109,7 +111,7 @@ def grep_file(fname, pattern):
 
     return subprocess.run(pattern, shell=True)
 
-def inspect_file(fname, pattern=None):
+def inspect_file(fname: str, pattern: Optional[str] = None):
     """Opens fname in less, optionally greps for a pattern first."""
     name = get_file(fname)
     bat_str = f"bat --color=always {name}"
@@ -166,7 +168,7 @@ def compile_code():
     else:
         p.print_green("[ OK ]")
 
-def insert_mod(mod, kedr=True):
+def insert_mod(mod: str, kedr: bool = True):
     """Calls insmod with mod and optionally attaches KEDR"""
     if subprocess.call(DMESG_C.split()) != 0:
         pass
@@ -184,7 +186,7 @@ def insert_mod(mod, kedr=True):
     else:
         p.print_green("[ OK ]")
 
-def remove_mod_silent(mod, kedr=True):
+def remove_mod_silent(mod: str, kedr: bool = True):
     subprocess.run(RMMOD.format(mod).split(), stdout=subprocess.DEVNULL,
                    stderr=subprocess.STDOUT)
     if kedr:
@@ -192,7 +194,7 @@ def remove_mod_silent(mod, kedr=True):
                        stderr=subprocess.STDOUT)
 
 
-def remove_mod(mod, dmesg=True, kedr=True):
+def remove_mod(mod: str, dmesg: bool = True, kedr: bool = True):
     """Performs module removal
 
     Calls rmmod with mod, optionally detaches KEDR, and optionally dumps the

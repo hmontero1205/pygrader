@@ -2,29 +2,65 @@
 
 import os
 import sys
+from typing import Callable, Tuple, List
 import json
 from pathlib import Path
+from dataclasses import dataclass
 
-from common.rubric_item import RubricItem
 import common.utils as u
 import common.printing as printing
 import common.submissions as subs
 
+@dataclass
+class RubricItem():
+    """Representation of a rubric item.
+
+    Attributes:
+        code: The code of this item (e.g. B1)
+        subitems: List containing (pts, desc) for each subitem (e.g. B1.1, B1.2)
+        tester: Callback function to grade this item.
+    """
+    code: str
+    subitems: List[Tuple[int, str]]
+    tester: Callable
+
 class HW():
     """Grading Base Class
 
+    Here's a visual representation of some of the fields:
+    ~
+    \_ .grade
+        \_ hwN <---- hw_workspace
+           \_ grades.json
+           \_ deadline.txt
+           \_ hwN <----- submission_dir
+
     Attributes:
-        hw: the hw #
-        root: Path of the form '~/.grade/hw{1,...,8}', which contains the
-            grade_dir, deadline.txt, and grades.json
-        grade_dir: The student/team's submission directory.
+        hw_name: the hw name (in the form 'hwN')
+        hw_workspace: Path of the form '~/.grade/hw{1,...,8}', which contains
+            the submission_dir, deadline.txt, and grades.json
+        scripts_dir: The directory that contains this hw's grading logic.
+        rubric: Python representation of the hw rubric
+        submission_dir: The student/team's submission directory
+            In the above example, this is cloned skeleton code for the
+            assignment. We simply pull down teams' tags. In Canvas-based
+            assignments, there is 1 submission_dir per student.
     """
 
-    def __init__(self, hw, root, rubric_file):
-        self.hw = hw
-        self.root = os.path.join(Path.home(), ".grade", root)
-        self.rubric = self.create_rubric(rubric_file)
-        self.grade_dir = None  # Populated in subclasses.
+    def __init__(self, hw_name, rubric_name):
+        self.hw_name = hw_name
+        self.hw_workspace = os.path.join(Path.home(), ".grade", hw_name)
+
+        # Here we assume we are running the grader from the root of the repo.
+        pygrader_root = os.getcwd()
+
+        self.scripts_dir = os.path.join(pygrader_root, self.hw_name)
+
+        # Here we assume the rubric file is in the scripts dir.
+        rubric_path = os.path.join(self.scripts_dir, rubric_name)
+        self.rubric = self.create_rubric(rubric_path)
+
+        self.submission_dir = None  # Populated in subclasses.
 
     def create_rubric(self, rubric_file):
         """Parses a JSON rubric file into a Python representation."""
@@ -39,28 +75,26 @@ class HW():
                 rubric[table_k] = {}
 
             for item in table_v:
-                # TODO: If the grade_* doesn't exist, should we link our generic
-                # grade() function?
                 ri_obg = RubricItem(
                             table_v[item]['name'],
                             list(zip(table_v[item]['points_per_subitem'],
                                     table_v[item]['desc_per_subitem'])),
-                            getattr(self, "grade_" + item, self.grade))
+                            getattr(self, "grade_" + item, self.default_grader))
                 rubric[table_k][item] = ri_obg
         return rubric
 
     def do_cd(self, path):
-        """Changes directory relative to the root of the student submission.
+        """Changes directory relative to the self.submission_dir.
 
         For example, if you had the following:
-            hw3
+            hw3  <---- self.submission_dir
             \_ part1
                \_ part1-sub
 
         and you wanted to cd into part1-sub, you would run
         `do_cd(os.path.join('part1', 'part1-sub'))`.
         """
-        part_dir = os.path.join(self.grade_dir, path)
+        part_dir = os.path.join(self.submission_dir, path)
         u.is_dir(part_dir)
         os.chdir(part_dir)
 
@@ -80,12 +114,11 @@ class HW():
         proc = u.cmd_popen("git log -n 1 --format='%aI'")
         iso_timestamp, _ = proc.communicate()
 
-        return subs.check_late(os.path.join(self.root, "deadline.txt"),
+        return subs.check_late(os.path.join(self.hw_workspace, "deadline.txt"),
                                iso_timestamp.strip('\n'))
 
-    def grade(self):
+    def default_grader(self):
         """Generic grade function."""
-        # TODO or should we raise NotImplementedError instead?
         printing.print_red("[ Opening shell, ^D/exit when done. ]")
         os.system("bash")
 
@@ -94,3 +127,33 @@ class HW():
 
     def cleanup(self):
         """Performs cleanup (kills stray processes, removes mods, etc.)."""
+
+def directory(start_dir: str) -> Callable:
+    """Decorator function that cd's into `start_dir` before the test.
+
+    If start_dir is 'root', we cd into the root of the submission_dir.
+    For example:
+        @directory("part1")
+        def test_B1(self):
+            ...
+    This will cd into submission_dir/part1 before calling test_B1().
+    """
+
+    # This is definitely overkill, but for ultimate correctness (and
+    # for the sake of making the decorator usage sleek), let's allow
+    # users to just use '/'. We can correct it here.
+    start_dir = os.path.join(*start_dir.split("/"))
+    def function_wrapper(test_func):
+        def cd_then_test(hw_instance):
+            try:
+                hw_instance.do_cd('' if start_dir == "root" else start_dir)
+            except ValueError as e:
+                printing.print_red(
+                        "[ Couldn't cd into tester's @directory ]")
+                print(e)
+                return
+            return test_func(hw_instance)
+
+        return cd_then_test
+
+    return function_wrapper

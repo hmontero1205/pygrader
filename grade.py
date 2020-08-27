@@ -6,22 +6,22 @@ import os
 import sys
 import signal
 import argparse
+from typing import Dict
 
 import common.printing as p
 import common.utils as utils
 from common.grades import Grades
+from common.hw_base import RubricItem
 from hw1.hw1 import HW1, HW1_ALIASES
 from hw3.hw3 import HW3, HW3_ALIASES
 from hw4.hw4 import HW4, HW4_ALIASES
-
-GRADES_FILE = "./grade.json"
 
 def main():
     """Entry-point into the grader"""
     parser = argparse.ArgumentParser(description="OS HW Grading Framework")
 
     parser.add_argument("hw", type=str, help="homework to grade")
-    parser.add_argument("student", type=str, nargs="?", default=None,
+    parser.add_argument("submitter", type=str, nargs="?", default=None,
                         help="the name of student/group to grade")
     parser.add_argument("-c", "--code", type=str, nargs="?", default="all",
                         help=("rubric item (e.g. A, B4) to grade; "
@@ -39,7 +39,7 @@ def main():
                              dest="regrade")
     script_mode.add_argument("-d", "--dump-grades", action="store_true",
                              help=("dump grades for this homework -- "
-                                   "all if no student specified"),
+                                   "all if no submitter specified"),
                              dest="dump_grades")
 
     args = parser.parse_args()
@@ -52,17 +52,17 @@ def main():
 
     rubric_code = args.code if args.code else "all"
 
-    tester = Grader(args.hw, args.student, rubric_code, env)
+    tester = Grader(args.hw, args.submitter, rubric_code, env)
     if args.dump_grades:
-        tester.grades.dump_grades(args.student, rubric_code.upper())
+        tester.grades.dump_grades(args.submitter, rubric_code.upper())
         sys.exit()
 
-    if not args.student:
+    if not args.submitter:
         sys.exit("unspecified student/team")
     tester.grade()
 
     # TODO: add progress/percentage complete?
-    p.print_light_purple("\n[ Pretty-printing pts/comments up until now... ]")
+    p.print_magenta("\n[ Pretty-printing pts/comments up until now... ]")
     tester.grades.print_submission_grades()
 
     # clean up
@@ -72,66 +72,72 @@ class Grader():
     """Represents the current hw grading session
 
     Attributes:
-        hw: Homework # being graded (e.g. hw1)
-        table: Table code being graded (based on AP/OS-style rubrics)
-        student: Team/uni of the submission
+        hw_name: Homework name being graded (e.g. hw1)
+        rubric_code: Rubric code being graded (based on AP/OS-style rubrics)
+            This can be a table (A), or an item (A1).
+        submitter: Team/uni of the submission
         hw_class: The object representing this homework (rubric, testers)
         env: Flags determining grader behavior (see main routine for argsparse)
         grades_file: Path to JSON file containing session grades
         grades: Maps (uni/team) -> (rubric item -> (pts, comments))
     """
-    def __init__(self, hw, student, table, env):
-        self.hw = hw
-        self.table = table
-        self.student = student
+    def __init__(self, hw_name: str, submitter: str, rubric_code: str,
+                 env: Dict[str, bool]):
+        self.hw_name = hw_name
+        self.rubric_code = rubric_code
+        self.submitter = submitter
         self.env = env
         self.hw_class = self._get_hw_class()
 
         signal.signal(signal.SIGINT, self.hw_class.exit_handler)
 
-        self.grades_file = os.path.join(self.hw_class.root, "grades.json")
+        self.grades_file = os.path.join(self.hw_class.hw_workspace,
+                                        "grades.json")
         self.grades = Grades(self.grades_file, self.hw_class.rubric,
-                             self.student)
+                             self.submitter)
 
     def _get_hw_class(self):
-        if self.hw.lower() in HW1_ALIASES:
-            return HW1(self.student)
-        elif self.hw.lower() in HW3_ALIASES:
-            return HW3(self.student)
-        elif self.hw.lower() in HW4_ALIASES:
-            return HW4(self.student)
+        if self.hw_name.lower() in HW1_ALIASES:
+            return HW1(self.submitter)
+        elif self.hw_name.lower() == "hw2":
+            sys.exit("There is no HW2 -- Just like Windows 9 :)")
+        elif self.hw_name.lower() in HW3_ALIASES:
+            return HW3(self.submitter)
+        elif self.hw_name.lower() in HW4_ALIASES:
+            return HW4(self.submitter)
         else:
-            sys.exit(f"Unsupported assignment: {self.hw}")
+            sys.exit(f"Unsupported assignment: {self.hw_name}")
 
-    def print_intro(self, part):
-        p.print_intro(self.student, self.hw, part)
+    def print_intro(self, rubric_code: str):
+        p.print_intro(self.submitter, self.hw_name, rubric_code)
 
-    def print_header(self, section):
+    def print_header(self, rubric_item: RubricItem):
         p.print_double()
-        p.print_green('Grading {}'.format(section.table_item))
-        self.print_desc(section)
+        p.print_green('Grading {}'.format(rubric_item.code))
+        self.print_subitems(rubric_item)
         p.print_double()
 
-    def print_desc(self, section):
-        for i, (pts, desc) in enumerate(section.desc, 1):
-            p.print_light_purple("{}.{} ({}p): {}".format(section.table_item,
-                                                          i, pts, desc))
+    def print_subitems(self, rubric_item: RubricItem):
+        for i, (pts, desc) in enumerate(rubric_item.subitems, 1):
+            p.print_magenta("{}.{} ({}p): {}".format(rubric_item.code,
+                                                     i, pts, desc))
 
-    def print_section_grade(self, code):
+    def print_subitem_grade(self, code: str, warn: bool = False):
         if self.grades.is_graded(code):
             # We've graded this already. Let's show the current grade.
             awarded = self.grades[code]["award"]
             comments = self.grades[code]["comments"]
-            p.print_green(f"[ Previous Grade: awarded={awarded} "
+            p.print_green(f"[ ({code}) Previous Grade: awarded={awarded} "
                           f"comments='{comments}']")
+        elif warn:
+            p.print_yellow(f"[ {code} hasn't been graded yet ]")
 
-    def prompt_grade(self, section):
+    def prompt_grade(self, rubric_item: RubricItem):
         """Prompts the TA for pts/comments"""
-        # self.print_desc(section)
-        for i, (pts, desc) in enumerate(section.desc, 1):
-            subitem_code = f"{section.table_item}.{i}"
-            p.print_light_purple(f"{subitem_code} ({pts}p): {desc}")
-            self.print_section_grade(subitem_code)
+        for i, (pts, desc) in enumerate(rubric_item.subitems, 1):
+            subitem_code = f"{rubric_item.code}.{i}"
+            p.print_magenta(f"{subitem_code} ({pts}p): {desc}")
+            self.print_subitem_grade(subitem_code)
             while True:
                 try:
                     award = input(f"{p.CBLUE2}Award? [y/n]: {p.CEND}")
@@ -153,14 +159,14 @@ class Grader():
 
         self.grades.synchronize()
 
-    def _check_valid_table(self, table_key):
-        """Given a key (i.e A, C, N) check if its a valid rubric table"""
+    def _check_valid_table(self, table_key: str):
+        """Given a key (i.e A, C, N) check if its a valid rubric item"""
 
         keys = [*self.hw_class.rubric.keys()]
         if table_key not in keys:
-            raise ValueError(f"{self.hw} does not have table {table_key}")
+            raise ValueError(f"{self.hw_name} does not have table {table_key}")
 
-    def _check_valid_item(self, item_key):
+    def _check_valid_item(self, item_key: str):
         """Given a table item (i.e. A1, B2, D9) check if it is valid.
 
         Assumes the table is valid (use _check_valid_table() for validation on
@@ -168,12 +174,11 @@ class Grader():
         """
         keys = [*self.hw_class.rubric[item_key[0]].keys()]
         if item_key not in keys:
-            raise ValueError(f"{self.hw} does not have rubric item {item_key}")
+            raise ValueError(f"{self.hw_name} does not have "
+                             f"rubric item {item_key}")
 
     def grade(self):
-        # The intro should be modified to account for when we grade all vs.
-        # one section vs. one table
-        key = self.table
+        key = self.rubric_code
         self.print_intro(key)
         if key.lower() == 'all':
             self.grade_all()
@@ -188,32 +193,31 @@ class Grader():
             item = key.upper()
             self._check_valid_table(table)
             self._check_valid_item(item)
-            section = self.hw_class.rubric[table][item]
-            self.grade_section(section)
+            rubric_item_obj = self.hw_class.rubric[table][item]
+            self.grade_item(rubric_item_obj)
 
     def grade_all(self):
         for table in self.hw_class.rubric:
             self.grade_table(table)
 
-    def grade_table(self, table_key):
-
+    def grade_table(self, table_key: str):
         table = self.hw_class.rubric[table_key]
 
-        for section in table:
-            self.grade_section(table[section])
+        for item in table:
+            self.grade_item(table[item])
 
-    def grade_section(self, section):
-        if (not self.env["regrade"]
-            and self.grades.is_graded(f"{section.table_item}.1")):
+    def grade_item(self, rubric_item: RubricItem):
+        if (not self.env["test_only"] and not self.env["regrade"]
+            and self.grades.is_graded(f"{rubric_item.code}.1")):
             p.print_yellow(
-                    f"[ {section.table_item} has been graded, skipping... ]")
+                    f"[ {rubric_item.code} has been graded, skipping... ]")
             return
 
         # if --grade-only/-g is not provided, run tests else skip tests
         if not self.env["grade_only"]:
             def test_wrapper():
-                self.print_header(section)
-                section.tester()
+                self.print_header(rubric_item)
+                rubric_item.tester()
             utils.run_and_prompt(test_wrapper)
 
         # if -t is not provided, ask for grade. If -t is provided skip
@@ -222,13 +226,12 @@ class Grader():
             is_late = self.hw_class.check_late_submission()
             if is_late:
                 self.grades.set_late(True)
-            # self.print_desc(section)
-            # self.print_section_grade(section)
-            self.prompt_grade(section)
-            print()
+            self.prompt_grade(rubric_item)
         else:
-            # Let the grader know if the item was graded yet
-            self.print_section_grade(section)
+            # Let the grader know if the subitems have been graded yet
+            for i in range(1, len(rubric_item.subitems) + 1):
+                code = f"{rubric_item.code}.{i}"
+                self.print_subitem_grade(code, warn=True)
 
 
 if __name__ == '__main__':

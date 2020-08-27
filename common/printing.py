@@ -56,8 +56,8 @@ def print_yellow(s):
     """Prints s in yellow"""
     print("{}{}{}".format(CYELLOW2, s, CEND))
 
-def print_light_purple(s):
-    """Prints s in light purple"""
+def print_magenta(s):
+    """Prints s in magenta"""
     print("{}{}{}".format(CVIOLET2, s, CEND))
 
 def print_purple(s):
@@ -78,11 +78,11 @@ def print_line():
 def print_double():
     print_cyan('='*85)
 
-def print_intro(team, hw, part):
+def print_intro(team, hw, code):
     print_double()
     print(f"{CCYAN}Team:{CEND} {CVIOLET2}{team}{CEND}  {CCYAN}HW:{CEND} "
           f"{CVIOLET2}{hw}{CEND}  {CCYAN}Rubric Code:{CEND} "
-          f"{CVIOLET2}{part}{CEND}")
+          f"{CVIOLET2}{code}{CEND}")
     print_double()
 
 def print_between_cyan_line(msg):
