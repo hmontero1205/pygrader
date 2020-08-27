@@ -88,13 +88,14 @@ def tag(tag_name: str) -> Callable:  # pylint: disable=unused-argument
     def function_wrapper(test_func):
         def checkout_to_tag_then_test(hw_instance):
             nonlocal tag_name
-            # Clean first
-            hw_instance.repo.git.checkout("--", "*")
             current_tag = hw_instance.repo.git.describe()
             if tag_name != current_tag:
+                # Clean first
+                hw_instance.repo.git.checkout("--", "*")
                 try:
                     if tag_name == "master":
                         tag_name = f"{hw_instance.submitter}"
+                        hw_instance.repo.git.checkout(tag_name)
                         printing.print_green(
                                 f"[ Checked out to {tag_name}/master ]\n")
                     else:
@@ -106,6 +107,8 @@ def tag(tag_name: str) -> Callable:  # pylint: disable=unused-argument
                             "[ Opening shell -- ^D/exit when resolved ]")
                     os.system("bash")
             else:
+                # No cleaning in case the TA made necessary changes to the
+                # submission that we don't want to throw away
                 printing.print_green(f"[ Checked out to {tag_name} ]\n")
 
             hw_instance.repo.git.clean("-f", "-d")

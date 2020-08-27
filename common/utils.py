@@ -46,9 +46,9 @@ def dir_exists(dir_path: str) -> bool:
     """Checks if dir_path exists (and is a directory)."""
     return os.path.isdir(dir_path)
 
-def prompt_file_name() -> str:
+def prompt_file_name(file_list: Optional[List[str]] = None) -> str:
     """Prompts the user for a file to open"""
-    ls_output = os.listdir()
+    ls_output = os.listdir() if not file_list else file_list
 
     for i, file in enumerate(ls_output):
         p.print_yellow("({}) {}".format(i+1, file))
@@ -99,24 +99,50 @@ def extract_between(fname: str, start: str, end: Optional[str] = None):
         sed_command = SED_BETWEEN.format(start, end, fname)
     os.system(sed_command)
 
-def grep_file(fname: str, pattern: str) -> str:
-    """Greps fname for pattern and prints the result
+def extract_function(file_name: str, funct_name: str) -> str:
+    if not file_exists(file_name):
+        return ""
+    stack = []
+    started = False
+    funct = ""
+    with open(file_name, "r") as f:
+        lines = f.readlines()
+        for line in lines:
+            if not funct_name in line and not started:
+                continue
 
-    TODO: this isn't actually being used as a grep.. it just wraps
-    subprocess.run. Actually wrap the grep command.
-    """
+            is_prototype = "{" not in line and ";" in line
+            if funct_name in line and not is_prototype:
+                started = True
+
+            funct += line
+            if '{' in line:
+                stack.append('{')
+
+            if '}' in line:
+                stack.pop()
+                if not stack:
+                    break
+
+    return funct
+
+def grep_file(fname: str, pattern: str, padding: int = 0) -> int:
+    """Greps fname for pattern and returns the status code
+
+    NOTE: Grep output is dumped to the shell."""
     fname = get_file(fname)
+    padding_opt = "" if not padding else f"-C {padding}"
+    cmd = f"grep --color=always {padding_opt} -E '{pattern}' {fname} "
 
-    pattern = pattern.format(fname=fname)
+    return subprocess.run(cmd, shell=True).returncode
 
-    return subprocess.run(pattern, shell=True)
-
-def inspect_file(fname: str, pattern: Optional[str] = None):
-    """Opens fname in less, optionally greps for a pattern first."""
+def inspect_file(fname: str, pattern: Optional[str] = None,
+                 use_pager: bool = True):
+    """Displays 'fname', w/ optional pattern highlighted, optionally in less"""
     name = get_file(fname)
     bat_str = f"bat --color=always {name}"
     grep_str = (f"GREP_COLORS='ms=01;91;107' grep --color=always "
-                f"-E '^|{pattern}' | less -R")
+                f"-E '^|{pattern}' {'| less -R' if use_pager else ''}")
     if pattern:
         cmd = f"{bat_str} | {grep_str}"
     else:
