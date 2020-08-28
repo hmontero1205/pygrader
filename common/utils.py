@@ -15,8 +15,8 @@ DMESG = "sudo dmesg"
 DMESG_C = "sudo dmesg -C"
 MAKE = "make clean && make"
 
-# This template will extract all text in [start, end)
-SED_BETWEEN = "sed -n '/{0}/,/{1}/{{/{1}/!p}}' {2}"
+# This template will extract all text in [start, end]
+SED_BETWEEN = "sed -n '/{0}/,/{1}/p' {2}"
 
 # This template will extract all text in [start, EOF)
 SED_TO_END = "sed -n '/{0}/,$p' {1}"
