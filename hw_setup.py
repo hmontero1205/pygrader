@@ -52,10 +52,15 @@ def _prompt_overwrite(hw_name: str, hw_path: str):
 
     shutil.rmtree(hw_path)
 
-def _clone_via_ssh(repo_name):
+def _clone_via_ssh(repo_name: str, init_submodules: bool):
     repo = f"{GITHUB_HW_ORG}/{repo_name}"
     printing.print_purple(f"[ Cloning {repo}... ]")
-    Repo.clone_from(f"git@github.com:{repo}.git", repo_name)
+    repo_obj = Repo.clone_from(f"git@github.com:{repo}.git", repo_name)
+
+    if init_submodules:
+        # This hw requires submodules in the grader to be initialized.
+        repo_obj.git.submodule("update", "--init", "--recursive")
+        repo_obj.git.submodule("update", "--remote")
 
 def main():
     """Prompts for homework deadline and prepares submissions for grading"""
@@ -105,7 +110,7 @@ def main():
                 create_dir(uni)
                 shutil.move(fname, os.path.join(uni, f"{uni}.tgz"))
 
-    elif args.hw in ('hw3', 'hw4'):
+    elif args.hw in ('hw3', 'hw4', 'hw5'):
         if os.path.isdir(args.hw):
             _prompt_overwrite(args.hw, args.hw)
 
@@ -114,7 +119,7 @@ def main():
 
         os.chdir(args.hw)
 
-        _clone_via_ssh(args.hw)
+        _clone_via_ssh(args.hw, init_submodules=(args.hw in ('hw5',)))
     else:
         pass
 

@@ -24,6 +24,7 @@ SED_TO_END = "sed -n '/{0}/,$p' {1}"
 def cmd_popen(cmd: str) -> 'Process':
     """Uses subprocess.Popen to run a command, returns the object."""
     prc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
+                     executable="/bin/bash",
                      stdout=subprocess.PIPE,
                      stderr=subprocess.STDOUT, close_fds=True,
                      universal_newlines=True)
