@@ -5,6 +5,7 @@ import sys
 import os
 import shutil
 import tarfile
+import zipfile
 from pathlib import Path
 from datetime import datetime
 from git import Repo
@@ -69,7 +70,7 @@ def main():
 
     parser.add_argument("hw", type=str, help="the hw to setup (e.g. hw1)")
     parser.add_argument("-s", "--submissions", dest="submissions", type=str,
-            help="path to tgz file containing all hw1 submissions")
+            help="path to zipfile containing all hw1 submissions")
     args = parser.parse_args()
 
     s_path = os.path.abspath(args.submissions) if args.submissions else None
@@ -82,25 +83,23 @@ def main():
     os.chdir(root)
     if args.hw in ('hw1', 'linux-list'):
         if not s_path:
-            sys.exit("hw1 usage: ./hw_setup hw1 -s <submission tarball path>")
+            sys.exit("hw1 usage: ./hw_setup hw1 -s <submission zipfile path>")
         if not args.submissions or (not os.path.isfile(s_path) or
-                not tarfile.is_tarfile(s_path)):
-            sys.exit(f"Please provide a valid tarball. "
+                not zipfile.is_zipfile(s_path)):
+            sys.exit(f"Please provide a valid zip file. "
                      f"Couldn't read file at {s_path}!")
 
         if os.path.isdir("hw1"):
             _prompt_overwrite(args.hw, "hw1")
 
-        shutil.copy(s_path, "./hw1.tgz")  # TODO: should I use os.path.join?
-        with tarfile.open("hw1.tgz", "r:gz") as tar:
-            # This will create the hw1 directory assuming the tarball was made
-            # out of a dir called hw1 xD
-            tar.extractall()
+        create_dir("hw1")
+        with zipfile.ZipFile(s_path) as submissions_zip:
+            submissions_zip.extractall("hw1")
 
         os.chdir("hw1")
 
-        # TODO This logic is sketchy because Canvas is inconsistent with how
-        # submissions are named. Maybe we should use the Canvas API?
+        # This logic is super sketchy because the Canvas naming convention
+        # is just not consistent at all...
         for fname in os.listdir():
             if os.path.isfile(fname) and tarfile.is_tarfile(fname):
                 without_ext = fname.split(".tgz")[0]
@@ -133,7 +132,7 @@ def main():
             os.system("make && sudo make install")
             os.chdir(cwd)
     else:
-        pass
+        sys.exit(f"Unsupported assignment: {args.hw}")
 
     record_deadline()
     print(f"Ready to grade {args.hw}!")

@@ -228,6 +228,15 @@ class Grader():
             p.print_line()
             is_late = self.hw_class.check_late_submission()
             if is_late:
+                # Once we find one part of the submission that is late, the
+                # whole thing is considered late.
+
+                # Since this happens after run_and_prompt, the submission_dir
+                # will still be checked out to the specified tag.
+
+                # TODO: I actually think we shouldn't do this here, since
+                # we don't want to mark submissions that are late on master
+                # late if none of the tags are late...
                 self.grades.set_late(True)
             self.prompt_grade(rubric_item)
         else:
