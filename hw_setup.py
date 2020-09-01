@@ -25,6 +25,7 @@ def create_dir(name):
 
 def record_deadline():
     """Reads in a deadline and stores it"""
+    printing.print_magenta("[ Recording assignment deadline... ]")
     while True:
         try:
             raw_deadline = input("Soft deadline (MM/DD/YY HH:MM AM/PM): ")
@@ -54,7 +55,7 @@ def _prompt_overwrite(hw_name: str, hw_path: str):
 
 def _clone_via_ssh(repo_name: str, init_submodules: bool):
     repo = f"{GITHUB_HW_ORG}/{repo_name}"
-    printing.print_purple(f"[ Cloning {repo}... ]")
+    printing.print_magenta(f"[ Cloning {repo}... ]")
     repo_obj = Repo.clone_from(f"git@github.com:{repo}.git", repo_name)
 
     if init_submodules:
@@ -75,6 +76,8 @@ def main():
 
     root = os.path.join(Path.home(), '.grade')
     create_dir(root)
+
+    pygrader_dir = os.getcwd()
 
     os.chdir(root)
     if args.hw in ('hw1', 'linux-list'):
@@ -120,6 +123,15 @@ def main():
         os.chdir(args.hw)
 
         _clone_via_ssh(args.hw, init_submodules=(args.hw in ('hw5',)))
+
+        if args.hw == "hw5":
+            # We need to install libfridge.
+            cwd = os.getcwd()
+            os.chdir(os.path.join(pygrader_dir, "hw5", "fridge-sols",
+                                  "user", "lib", "libfridge"))
+            printing.print_magenta("[ Installing libfridge... ]")
+            os.system("make && sudo make install")
+            os.chdir(cwd)
     else:
         pass
 

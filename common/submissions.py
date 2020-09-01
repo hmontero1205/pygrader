@@ -88,7 +88,7 @@ def tag(tag_name: str) -> Callable:  # pylint: disable=unused-argument
     def function_wrapper(test_func):
         def checkout_to_tag_then_test(hw_instance):
             nonlocal tag_name
-            current_tag = hw_instance.repo.git.describe()
+            current_tag = hw_instance.repo.git.describe("--always")
             if tag_name != current_tag:
                 # Clean first
                 hw_instance.repo.git.checkout("--", "*")
