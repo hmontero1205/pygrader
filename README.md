@@ -4,8 +4,14 @@
 Grading infrastructure for Jae's COMS 4118, primarily written in Python.
 
 # Guide
+## Dependency Installation
+Run the following:
+```
+./install_dependencies
+```
 
-## Setup
+This will make sure you have all the necessary apt packages and python3 libraries installed.
+## Pre-grading Setup
 Generally speaking, you run the following before beginning to grade an assignment:
 ```
 ./hw_setup.py hwN

@@ -1,0 +1,5 @@
+GitPython==3.1.7
+psutil==5.7.2
+pylint==2.5.2
+pytz==2020.1
+requests==2.21.0
