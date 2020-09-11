@@ -7,7 +7,7 @@ Grading infrastructure for Jae's COMS 4118, primarily written in Python.
 ## Dependency Installation
 Run the following:
 ```
-./install_dependencies
+./install_dependencies.sh
 ```
 
 This will make sure you have all the necessary apt packages and python3 libraries installed.
