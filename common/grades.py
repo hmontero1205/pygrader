@@ -127,7 +127,7 @@ class Grades():
         if submitter:
             self.print_submission_grades(submitter, rubric_code)
         else:
-            for name in self._grades:
+            for name in sorted(self._grades):
                 is_graded, total_pts = self.print_submission_grades(name,
                                                                     rubric_code)
                 all_pts += total_pts
@@ -213,8 +213,8 @@ class Grades():
         total_pts = max(total_pts, 0)
 
         if graded:
-            print(f"{name}\t{total_pts}\t{concatted_comments}")
+            print(name, total_pts, concatted_comments, sep='\t')
         else:
-            print(f"{name}\tn/a\tn/a")
+            print(name, "n/a", "n/a", sep='\t')
 
         return graded, total_pts
