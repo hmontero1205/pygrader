@@ -101,6 +101,7 @@ class Grades():
         with open(self.grades_file, "w") as f:
             # Indent for pretty printing :^)
             json.dump(self._grades, f, indent=4, sort_keys=True)
+            os.fsync(f.fileno())
 
     def is_graded(self, code: str, name: Optional[str] = None) -> bool:
         """Checks if a subitem has been graded yet"""
