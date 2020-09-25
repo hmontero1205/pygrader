@@ -93,7 +93,7 @@ optional arguments:
 - Simply running `./grade.py <hw> <student>` will run through the entire rubric
   and skip any previously graded items.
 - If a submission crashes the grader/VM, restart and run
-  `./grade.py --grade-only <hw> <student> <item that crashed>`. This will
+  `./grade.py --grade-only <hw> <student> --code=<item that crashed>`. This will
   allow you to assign points/comments to that rubric item without rerunning the
   problematic tests.
 - There are a few modes for dumping grades. Below are some examples. The first
