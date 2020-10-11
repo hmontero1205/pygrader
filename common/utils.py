@@ -79,10 +79,11 @@ def concat_files(outfile: str, file_types: List[str]) -> str:
     """Concats all relevant files in the cwd into 1 file called `outfile`."""
     if file_exists(outfile):
         return outfile
-
+    file_header = "="*80 + "\n{}\n" + "="*80 + "\n"
     with open(outfile, "w+") as o:
         for fname in os.listdir():
             if fname != outfile and fname[-2:] in file_types:
+                o.write(file_header.format(fname))
                 shutil.copyfileobj(open(fname, "r"), o)
     return outfile
 

@@ -51,8 +51,8 @@ class HW():
         self.hw_name = hw_name
         self.hw_workspace = os.path.join(Path.home(), ".grade", hw_name)
 
-        # Here we assume we are running the grader from the root of the repo.
-        pygrader_root = os.getcwd()
+        # Find grader root relative to hw_base.py: root/common/hw_base.py
+        pygrader_root = Path(__file__).resolve().parent.parent
 
         self.scripts_dir = os.path.join(pygrader_root, self.hw_name)
 
@@ -148,10 +148,9 @@ def directory(start_dir: str) -> Callable:
             try:
                 hw_instance.do_cd('' if start_dir == "root" else start_dir)
             except ValueError as e:
-                printing.print_red(
-                        "[ Couldn't cd into tester's @directory ]")
-                print(e)
-                return
+                printing.print_red("[ Couldn't cd into tester's @directory, "
+                                   "opening shell.. ]")
+                os.system("bash")
             return test_func(hw_instance)
 
         return cd_then_test
