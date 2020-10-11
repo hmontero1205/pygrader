@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """
 wrapper script to run grade.py in tmux session.
 this is not a perfect solution. Use with your own risk

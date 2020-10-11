@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """hw_setup.py: Prepares grading enviorment"""
 import argparse
 import sys
