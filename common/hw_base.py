@@ -147,7 +147,7 @@ def directory(start_dir: str) -> Callable:
         def cd_then_test(hw_instance):
             try:
                 hw_instance.do_cd('' if start_dir == "root" else start_dir)
-            except ValueError as e:
+            except ValueError:
                 printing.print_red("[ Couldn't cd into tester's @directory, "
                                    "opening shell.. ]")
                 os.system("bash")
