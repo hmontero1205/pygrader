@@ -128,7 +128,7 @@ class Grades():
         if submitter:
             self.print_submission_grades(submitter, rubric_code)
         else:
-            for name in sorted(self._grades):
+            for name in sorted(self._grades, key=str.casefold):
                 is_graded, total_pts = self.print_submission_grades(name,
                                                                     rubric_code)
                 all_pts += total_pts
