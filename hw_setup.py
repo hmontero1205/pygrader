@@ -112,7 +112,7 @@ def main():
                 create_dir(uni)
                 shutil.move(fname, os.path.join(uni, f"{uni}.tgz"))
 
-    elif args.hw in ('hw3', 'hw4', 'hw5'):
+    elif args.hw in ('hw3', 'hw4', 'hw5', 'exam1-2020-9'):
         if os.path.isdir(args.hw):
             _prompt_overwrite(args.hw, args.hw)
 
