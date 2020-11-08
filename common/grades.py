@@ -181,12 +181,12 @@ class Grades():
                     ta_comments = submission_scores[code]["comments"]
                     item_comments = ""
 
-                    if (((raw_pts and item_code.startswith("A"))
-                        or (not raw_pts and not item_code.startswith("A"))) or
+                    if (((raw_pts and pts < 0)
+                        or (not raw_pts and not pts < 0)) or
                             ta_comments):
                         # Always print the code if points were not awarded for
-                        # a subitem. Table A is deductive points though, so
-                        # we prepend the code if it was awarded.
+                        # a subitem. For deductive points, so we prepend the
+                        # code if it was awarded.
 
                         # If a section only has one item, print A2 instead of
                         # A2.1 since that's how we stylize our rubrics.
