@@ -94,13 +94,15 @@ def remove_file(fname: str):
     else:
         p.print_red(f"[ OPPS - {fname} does not exist ]")
 
-def extract_between(fname: str, start: str, end: Optional[str] = None):
+def extract_between(fname: str, start: str, end: Optional[str] = None,
+                    capture: bool = False):
     """Prints the text in fname that's in between start and end"""
     if not end:
         sed_command = SED_TO_END.format(start, fname)
     else:
         sed_command = SED_BETWEEN.format(start, end, fname)
-    os.system(sed_command)
+    return subprocess.run(sed_command, shell=True, capture_output=capture,
+                          universal_newlines=True)
 
 def extract_function(file_name: str, funct_name: str) -> str:
     if not file_exists(file_name):
@@ -136,7 +138,14 @@ def grep_file(fname: str, pattern: str, padding: int = 0) -> int:
     fname = get_file(fname)
     padding_opt = "" if not padding else f"-C {padding}"
     cmd = f"grep --color=always {padding_opt} -E '{pattern}' {fname} "
+    return subprocess.run(cmd, shell=True).returncode
 
+def grep_string(words: str, pattern: str, padding: int = 0) -> int:
+    """Greps fname for pattern and returns the status code
+
+    NOTE: Grep output is dumped to the shell."""
+    padding_opt = "" if not padding else f"-C {padding}"
+    cmd = f"echo '{words}' | grep --color=always {padding_opt} -E '^|{pattern}'"
     return subprocess.run(cmd, shell=True).returncode
 
 def inspect_file(fname: str, pattern: Optional[str] = None,
