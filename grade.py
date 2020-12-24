@@ -18,6 +18,7 @@ from hw4.hw4 import HW4, HW4_ALIASES
 from hw5.hw5 import HW5, HW5_ALIASES
 from hw6.hw6 import HW6, HW6_ALIASES
 from exam1.exam1 import EXAM1, EXAM1_ALIASES
+from final.final import Final, FINAL_ALIASES
 
 def main():
     """Entry-point into the grader"""
@@ -114,6 +115,8 @@ class Grader():
             return HW6(self.submitter)
         elif self.hw_name.lower() in EXAM1_ALIASES:
             return EXAM1(self.submitter)
+        elif self.hw_name.lower() in FINAL_ALIASES:
+            return Final(self.submitter)
         else:
             sys.exit(f"Unsupported assignment: {self.hw_name}")
 

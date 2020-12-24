@@ -1,0 +1,71 @@
+{
+    "A": {
+        "A1": {
+            "name": "A1",
+            "points_per_subitem": [
+                2
+            ],
+            "desc_per_subitem": [
+                "At least 1 commit (i.e. min of 4)"
+            ]
+        }
+    },
+    "B": {
+        "B1": {
+            "name": "B1",
+            "points_per_subitem": [
+                16
+            ],
+            "desc_per_subitem": [
+                ""
+            ]
+        },
+        "B2": {
+            "name": "B2",
+            "points_per_subitem": [
+                20
+            ],
+            "desc_per_subitem": [
+                ""
+            ]
+        },
+        "B3": {
+            "name": "B3",
+            "points_per_subitem": [
+                18
+            ],
+            "desc_per_subitem": [
+                ""
+            ]
+        }
+    },
+    "C": {
+        "C1": {
+            "name": "C1",
+            "points_per_subitem": [
+                26
+            ],
+            "desc_per_subitem": [
+                ""
+            ]
+        },
+        "C2": {
+            "name": "C2",
+            "points_per_subitem": [
+                8
+            ],
+            "desc_per_subitem": [
+                ""
+            ]
+        },
+        "C3": {
+            "name": "C3",
+            "points_per_subitem": [
+                10
+            ],
+            "desc_per_subitem": [
+                ""
+            ]
+        }
+    }
+}
