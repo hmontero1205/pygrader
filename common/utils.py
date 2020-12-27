@@ -3,7 +3,6 @@ import os
 import subprocess
 import shutil
 
-from subprocess import TimeoutExpired
 from typing import Callable, Dict, Optional, List
 
 import common.printing as p
@@ -15,9 +14,6 @@ KEDR_STOP = "sudo kedr stop {}"
 DMESG = "sudo dmesg"
 DMESG_C = "sudo dmesg -C"
 MAKE = "make clean && make"
-
-# This template will extract all text in [start, end]
-SED_BETWEEN = "sed -n '/{0}/,/{1}/p' {2}"
 
 # This template will extract all text in [start, EOF)
 SED_TO_END = "sed -n '/{0}/,$p' {1}"
@@ -31,9 +27,9 @@ def cmd_popen(cmd: str) -> 'Process':
                      universal_newlines=True)
     return prc
 
-def run_cmd(cmd: str, silent: bool = False, shell: bool = True, **kwargs) -> int:
+def run_cmd(cmd: str, silent: bool = False, shell: bool = True) -> int:
     """Runs cmd and returns the status code."""
-    return subprocess.run(cmd, shell=shell, capture_output=silent, **kwargs).returncode
+    return subprocess.run(cmd, shell=shell, capture_output=silent).returncode
 
 def is_dir(path: str):
     """Checks if path is a directory"""
@@ -80,11 +76,10 @@ def concat_files(outfile: str, file_types: List[str]) -> str:
     """Concats all relevant files in the cwd into 1 file called `outfile`."""
     if file_exists(outfile):
         return outfile
-    file_header = "="*80 + "\n{}\n" + "="*80 + "\n"
+
     with open(outfile, "w+") as o:
         for fname in os.listdir():
             if fname != outfile and fname[-2:] in file_types:
-                o.write(file_header.format(fname))
                 shutil.copyfileobj(open(fname, "r"), o)
     return outfile
 
@@ -101,8 +96,7 @@ def extract_between(fname: str, start: str, end: Optional[str] = None,
         sed_command = SED_TO_END.format(start, fname)
     else:
         sed_command = SED_BETWEEN.format(start, end, fname)
-    return subprocess.run(sed_command, shell=True, capture_output=capture,
-                          universal_newlines=True)
+    return subprocess.run(sed_command, shell=True, capture_output=capture)
 
 def extract_function(file_name: str, funct_name: str) -> str:
     if not file_exists(file_name):
@@ -138,14 +132,7 @@ def grep_file(fname: str, pattern: str, padding: int = 0) -> int:
     fname = get_file(fname)
     padding_opt = "" if not padding else f"-C {padding}"
     cmd = f"grep --color=always {padding_opt} -E '{pattern}' {fname} "
-    return subprocess.run(cmd, shell=True).returncode
 
-def grep_string(words: str, pattern: str, padding: int = 0) -> int:
-    """Greps fname for pattern and returns the status code
-
-    NOTE: Grep output is dumped to the shell."""
-    padding_opt = "" if not padding else f"-C {padding}"
-    cmd = f"echo '{words}' | grep --color=always {padding_opt} -E '^|{pattern}'"
     return subprocess.run(cmd, shell=True).returncode
 
 def inspect_file(fname: str, pattern: Optional[str] = None,
@@ -205,8 +192,6 @@ def compile_code():
         p.print_red("[ OOPS ]")
     else:
         p.print_green("[ OK ]")
-
-    return ret
 
 def insert_mod(mod: str, kedr: bool = True):
     """Calls insmod with mod and optionally attaches KEDR"""
@@ -341,6 +326,3 @@ def run_and_prompt_multi(test_name_to_callable: Dict[str, Callable],
             break
         else:
             continue
-
-def prompt_continue():
-    input(f"{p.CCYAN}[ Press enter to continue... ]{p.CEND}")
