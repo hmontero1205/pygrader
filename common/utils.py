@@ -195,7 +195,7 @@ def compile_code():
     """Compiles the current directory (either with Make or manually)"""
     ls_output = os.listdir()
     if "Makefile" not in ls_output:
-        # Let's let the grader figure it out
+        # Let's let the grader figure it out
         os.system("bash")
 
     p.print_cyan("[ Compiling... ]")
