@@ -1,4 +1,0 @@
-[submodule "hw5/fridge-sols"]
-	path = hw5/fridge-sols
-	url = git@github.com:cs4118/linux-4118
-	branch = fridge-sol
