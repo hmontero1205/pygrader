@@ -22,7 +22,7 @@ from exam2.exam2 import EXAM2, EXAM2_ALIASES
 
 def main():
     """Entry-point into the grader"""
-    parser = argparse.ArgumentParser(description="OS HW Grading Framework")
+    parser = argparse.ArgumentParser(description="pygrader: Python Grading Framework")
 
     parser.add_argument("hw", type=str, help="homework to grade")
     parser.add_argument("submitter", type=str, nargs="?", default=None,

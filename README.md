@@ -1,7 +1,7 @@
-[![pylint](https://github.com/cs4118/new_grading_scripts/workflows/pylint/badge.svg)](https://github.com/cs4118/new_grading_scripts/actions?query=workflow%3Apylint)
+[![pylint](https://github.com/hmontero1205/pygrader/workflows/pylint/badge.svg)](https://github.com/hmontero1205/pygrader/actions?query=workflow%3Apylint)
 
 # pygrader
-Grading infrastructure for Jae's COMS 4118, primarily written in Python.
+A generic grading framework for coding assignments.
 
 # Guide
 ## Dependency Installation
@@ -28,7 +28,7 @@ serving as the workspace for grading submissions, grades (awarded points & comme
        \_ hwN
 ```
 
-For GitHub-based assignments, the `hwN` subdirectory will be a clone of the skeleton code and is used for pulling in submissions tags. For Canvas-based assignments, there will be a directory for each student (see [hw1/README.md](hw1/README.md) for more details).
+For GitHub-based assignments, the `hwN` subdirectory will be a clone of the skeleton code and is used for pulling in submissions tags. For Canvas-based assignments, there will be a directory for each student.
 
 ### grades.json
 This is a JSON representation of your grading progress for a given hw. It takes the following form:
@@ -72,7 +72,7 @@ The grader will compare this date with the timestamp on the latest commit of the
 ```
 usage: grade.py [-h] [-c [CODE]] [-g | -t] [-r | -d] hw [student]
 
-OS HW Grading Framework
+pygrader: Python Grading Framework
 
 positional arguments:
   hw                    homework # to grade
@@ -159,5 +159,8 @@ This library contains logic related to our git/GitHub workflow. Our late submiss
 ## `common/printing.py`
 This library essentially wraps `print()` with colors. This is meant to be a little more flexible than some pylibrary like `termcolor`, although it might be worth looking into that.
 
-# Acknowledgement
-- Written by Dave and Hans in Summer 2020
+# Contributors
+- Dave Dirnfeld
+- Kent Hall
+- Evan Mesterhazy
+- Hans Montero
