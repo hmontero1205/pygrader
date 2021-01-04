@@ -17,6 +17,6 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
+          python-version: '3.6'
       - run: pip install pylint  # -r requirements.txt
       - run: pylint --rcfile=.pylintrc $PWD
