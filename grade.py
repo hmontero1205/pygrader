@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""grade.py: Generic grading framework"""
+"""grade.py: Grading driver"""
 
 import os
 import sys
@@ -8,8 +8,6 @@ import signal
 import argparse
 from typing import Dict
 
-import common.printing as p
-import common.utils as utils
 from common.grades import Grades
 from common.hw_base import RubricItem
 from hw1.hw1 import HW1, HW1_ALIASES
@@ -19,6 +17,9 @@ from hw5.hw5 import HW5, HW5_ALIASES
 from hw6.hw6 import HW6, HW6_ALIASES
 from exam1.exam1 import EXAM1, EXAM1_ALIASES
 from exam2.exam2 import EXAM2, EXAM2_ALIASES
+
+import common.printing as p
+import common.utils as utils
 
 def main():
     """Entry-point into the grader"""

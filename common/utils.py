@@ -3,7 +3,6 @@ import os
 import subprocess
 import shutil
 
-from subprocess import TimeoutExpired
 from typing import Callable, Dict, Optional, List
 
 import common.printing as p
@@ -31,9 +30,11 @@ def cmd_popen(cmd: str) -> 'Process':
                      universal_newlines=True)
     return prc
 
-def run_cmd(cmd: str, silent: bool = False, shell: bool = True, **kwargs) -> int:
+def run_cmd(cmd: str, silent: bool = False,
+            shell: bool = True, **kwargs) -> int:
     """Runs cmd and returns the status code."""
-    return subprocess.run(cmd, shell=shell, capture_output=silent, **kwargs).returncode
+    return subprocess.run(cmd, shell=shell,
+                          capture_output=silent, **kwargs).returncode
 
 def is_dir(path: str):
     """Checks if path is a directory"""
@@ -344,3 +345,4 @@ def run_and_prompt_multi(test_name_to_callable: Dict[str, Callable],
 
 def prompt_continue():
     input(f"{p.CCYAN}[ Press enter to continue... ]{p.CEND}")
+
