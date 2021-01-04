@@ -5,9 +5,9 @@ name: pylint
 # Run on commits/PRs onto master
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 # Set up a python3 env and run pylint
 jobs:
