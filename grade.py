@@ -23,7 +23,8 @@ import common.utils as utils
 
 def main():
     """Entry-point into the grader"""
-    parser = argparse.ArgumentParser(description="pygrader: Python Grading Framework")
+    parser = argparse.ArgumentParser(
+                            description="pygrader: Python Grading Framework")
 
     parser.add_argument("hw", type=str, help="homework to grade")
     parser.add_argument("submitter", type=str, nargs="?", default=None,
