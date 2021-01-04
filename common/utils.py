@@ -345,4 +345,3 @@ def run_and_prompt_multi(test_name_to_callable: Dict[str, Callable],
 
 def prompt_continue():
     input(f"{p.CCYAN}[ Press enter to continue... ]{p.CEND}")
-

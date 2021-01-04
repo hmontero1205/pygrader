@@ -8,8 +8,6 @@ import signal
 import argparse
 from typing import Dict
 
-from common.grades import Grades
-from common.hw_base import RubricItem
 from hw1.hw1 import HW1, HW1_ALIASES
 from hw3.hw3 import HW3, HW3_ALIASES
 from hw4.hw4 import HW4, HW4_ALIASES
@@ -17,6 +15,8 @@ from hw5.hw5 import HW5, HW5_ALIASES
 from hw6.hw6 import HW6, HW6_ALIASES
 from exam1.exam1 import EXAM1, EXAM1_ALIASES
 from exam2.exam2 import EXAM2, EXAM2_ALIASES
+from common.grades import Grades
+from common.hw_base import RubricItem
 
 import common.printing as p
 import common.utils as utils
