@@ -103,7 +103,25 @@ class DEMO(HW):
         input(f"{pr.CVIOLET2}[ Press enter to view Makefile ]{pr.CEND}")
         u.inspect_file("Makefile") # Opens file in bat (a better cat)
 
-        input(f"{pr.CVIOLET2}[ Press enter to view swap() ]{pr.CEND}")
+        input(f"\n{pr.CVIOLET2}[ Press enter to view swap() ]{pr.CEND}")
         swap_fn = u.extract_function("swap.c", "swap")
-        print(swap_fn)
+        u.inspect_string(swap_fn, lang="c")
+
+    @directory("swap")
+    def grade_C2(self):
+        """C2: dynamic analysis"""
+        if u.compile_code(): # Non-zero exit code (e.g. compilation failed)
+            return
+
+        swap = u.cmd_popen(f"{os.path.join(os.getcwd(), 'swap')} 1 2")
+        out, code = swap.communicate()
+
+        if code:
+            pr.print_red("[ Non-zero exit code ]")
+
+        print(out)
+        if out.splitlines()[1] == "After: 2 1":
+            pr.print_green("[ PASS ]")
+        else:
+            pr.print_red("[ FAIL ] Didn't match 'After: 2 1'")
 

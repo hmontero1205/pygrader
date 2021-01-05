@@ -149,6 +149,22 @@ def grep_string(words: str, pattern: str, padding: int = 0) -> int:
     cmd = f"echo '{words}' | grep --color=always {padding_opt} -E '^|{pattern}'"
     return subprocess.run(cmd, shell=True).returncode
 
+def inspect_string(s: str, pattern: Optional[str] = None,
+                   use_pager: bool = True, lang: Optional[str] = None):
+    if not lang:
+        lang = "txt"
+
+    bat_str= f"bat --color=always -l {lang}"
+    grep_str = (f"GREP_COLORS='ms=01;91;107' grep --color=always "
+                f"-E '^|{pattern}' {'| less -R' if use_pager else ''}")
+    if pattern:
+        cmd = f"{bat_str} | {grep_str}"
+    else:
+        cmd = bat_str
+
+    bat = cmd_popen(cmd)
+    print(bat.communicate(input=s)[0])
+
 def inspect_file(fname: str, pattern: Optional[str] = None,
                  use_pager: bool = True):
     """Displays 'fname', w/ optional pattern highlighted, optionally in less"""
