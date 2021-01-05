@@ -141,9 +141,12 @@ def main():
 
         # Submissions are in pygrader/tutorial/fake-submissions
         fake_subs_path = os.path.join(pygrader_dir, "demo", "fake-submissions")
-        shutil.copytree(os.path.join(fake_subs_path, "student1"), "student1")
-        shutil.copytree(os.path.join(fake_subs_path, "student2"), "student2")
-        shutil.copytree(os.path.join(fake_subs_path, "student3"), "student3")
+        for f in os.listdir(fake_subs_path):
+            sub = os.path.join(fake_subs_path, f)
+            if not os.path.isfile(sub):
+                continue
+
+            shutil.copy(sub, f)
 
     else:
         sys.exit(f"Unsupported assignment: {args.hw}")

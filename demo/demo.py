@@ -2,6 +2,7 @@
 
 from typing import Optional
 import os
+import shutil
 import sys
 
 import git
@@ -33,13 +34,11 @@ class DEMO(HW):
             self.submission_dir = os.path.join(self.hw_workspace, self.submitter)
 
             try:
-                u.is_dir(self.submission_dir)
+                u.is_dir(self.hw_workspace)
             except ValueError:
                 sys.exit("Please run hw_setup before grading")
 
-            os.chdir(self.submission_dir)
-
-            self.repo = git.Repo(self.submission_dir)
+            os.chdir(self.hw_workspace)
 
             if not self.setup():
                 sys.exit(f"Couldn't setup {submitter}'s submission!")
@@ -55,9 +54,22 @@ class DEMO(HW):
 
     def setup(self) -> bool:
         """Do any necessary setup for the submission"""
-        # In this case, we aren't pulling from a repo or untaring something.
-        # Let's just make sure the submission is clean.
-        self.cleanup()
+
+        # Remove the dir to start fresh
+        shutil.rmtree(self.submission_dir, ignore_errors=True)
+        os.mkdir(self.submission_dir)
+        os.chdir(self.submission_dir)
+
+        self.repo = git.Repo.init(self.submission_dir) # Create empty repo
+
+        # Apply the submission patch
+        try:
+            self.repo.git.am(os.path.join(self.hw_workspace,
+                             f"{self.submitter}.patch"))
+        except Exception as e:
+            print(e)
+            return False
+
         return True
 
     def cleanup(self):
