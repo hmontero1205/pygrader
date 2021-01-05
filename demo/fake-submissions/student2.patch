@@ -1,0 +1,159 @@
+From 313d737b51e2dc13b8e2b7e36d82da837d410329 Mon Sep 17 00:00:00 2001
+From: Hans Montero <hjm2133@columbia.edu>
+Date: Tue, 5 Jan 2021 13:30:30 -0500
+Subject: [PATCH 1/5] Complete written answers
+
+---
+ written_answers.txt | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+ create mode 100644 written_answers.txt
+
+diff --git a/written_answers.txt b/written_answers.txt
+new file mode 100644
+index 0000000..b9b8d0d
+--- /dev/null
++++ b/written_answers.txt
+@@ -0,0 +1,13 @@
++===================================== Q1 =======================================
++
++True: dsjfhsdkljfhdskljfhsdkjfh
++
++===================================== Q2 =======================================
++
++False: dsfkhjuiewrihudsfkjdskjhfdskjhf
++
++===================================== Q3 =======================================
++
++True: dsfkhjdshfdgshjfgsdfhgjsdghjfgshdjfghjsdfghjds
++
++================================================================================
+-- 
+2.17.1
+
+
+From 6882861e2256b251a116b5d187d646e7b4df947d Mon Sep 17 00:00:00 2001
+From: Hans Montero <hjm2133@columbia.edu>
+Date: Tue, 5 Jan 2021 13:30:40 -0500
+Subject: [PATCH 2/5] Add Makefile
+
+---
+ Makefile | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+ create mode 100644 Makefile
+
+diff --git a/Makefile b/Makefile
+new file mode 100644
+index 0000000..fd3f591
+--- /dev/null
++++ b/Makefile
+@@ -0,0 +1,14 @@
++CC=gcc
++CFLAGS=-g -Wall
++LDFLAGS=-g
++
++swap: swap.o
++
++swap.o:
++
++.PHONY:clean
++clean:
++	rm -f *.o swap a.out
++
++.PHONY: all
++all: clean swap
+-- 
+2.17.1
+
+
+From 0a7cb24614783ec5d990baa364249da1a90b1c33 Mon Sep 17 00:00:00 2001
+From: Hans Montero <hjm2133@columbia.edu>
+Date: Tue, 5 Jan 2021 13:31:11 -0500
+Subject: [PATCH 3/5] Implement swap.c
+
+---
+ swap.c | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+ create mode 100644 swap.c
+
+diff --git a/swap.c b/swap.c
+new file mode 100644
+index 0000000..b01f3c1
+--- /dev/null
++++ b/swap.c
+@@ -0,0 +1,17 @@
++#include <stdio.h>
++#include <stdlib.h>
++
++void swap(int *p, int *q) {
++    int temp = *p;
++    *p = *q;
++    *q = temp;
++}
++
++int main(int argc, char **argv) {
++    int x = atoi(argv[1]);
++    int y = atoi(argv[2]);
++
++    printf("Before: %d %d\n", x, y);
++    swap(&x, &y);
++    printf("After: %d %d\n", x, y);
++}
+-- 
+2.17.1
+
+
+From 6e04c78e607fa3192203b235dabeeaf74c7bdc40 Mon Sep 17 00:00:00 2001
+From: Hans Montero <hjm2133@columbia.edu>
+Date: Tue, 5 Jan 2021 13:33:49 -0500
+Subject: [PATCH 4/5] Make silly change to swap
+
+---
+ swap.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/swap.c b/swap.c
+index b01f3c1..d10f067 100644
+--- a/swap.c
++++ b/swap.c
+@@ -2,9 +2,11 @@
+ #include <stdlib.h>
+ 
+ void swap(int *p, int *q) {
+-    int temp = *p;
+-    *p = *q;
+-    *q = temp;
++    int x = *p;
++    int y = *q;
++    int temp = x;
++    x = y;
++    y = temp;
+ }
+ 
+ int main(int argc, char **argv) {
+-- 
+2.17.1
+
+
+From b7f0e7b8b199e110bea33cc2638d96c91f5dde5d Mon Sep 17 00:00:00 2001
+From: Hans Montero <hjm2133@columbia.edu>
+Date: Tue, 5 Jan 2021 13:38:27 -0500
+Subject: [PATCH 5/5] Move code to subdir
+
+---
+ Makefile => swap/Makefile | 0
+ swap.c => swap/swap.c     | 0
+ 2 files changed, 0 insertions(+), 0 deletions(-)
+ rename Makefile => swap/Makefile (100%)
+ rename swap.c => swap/swap.c (100%)
+
+diff --git a/Makefile b/swap/Makefile
+similarity index 100%
+rename from Makefile
+rename to swap/Makefile
+diff --git a/swap.c b/swap/swap.c
+similarity index 100%
+rename from swap.c
+rename to swap/swap.c
+-- 
+2.17.1
+
