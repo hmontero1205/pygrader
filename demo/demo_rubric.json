@@ -1,0 +1,56 @@
+{
+    "A": {
+        "A1": {
+            "name": "A1",
+            "points_per_subitem": [ -5 ],
+            "desc_per_subitem": [ "Tracked compilation artifacts" ]
+        },
+
+        "A2": {
+            "name": "A2",
+            "points_per_subitem": [ -5 ],
+            "desc_per_subitem": [ "Less than 5 meaningful git commits" ]
+        }
+    },
+    "B": {
+        "B1": {
+            "name": "B1",
+            "points_per_subitem": [
+                5,
+                5,
+                5
+            ],
+            "desc_per_subitem": [ 
+                "Correct WQ1 answer",
+                "Correct WQ2 answer",
+                "Correct WQ3 answer"
+            ]
+        }
+    },
+
+    "C": {
+        "C1": {
+            "name": "C1",
+            "points_per_subitem": [
+                5,
+                5
+            ],
+            "desc_per_subitem": [ 
+                "Correct Makefile dependencies",
+                "Attempts to complete swap() implementation"
+            ]
+        },
+
+        "C2": {
+            "name": "C2",
+            "points_per_subitem": [
+                5,
+                10
+            ],
+            "desc_per_subitem": [ 
+                "Make builds without warnings",
+                "Swaps the two numbers"
+            ]
+        }
+    }
+}

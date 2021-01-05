@@ -132,6 +132,19 @@ def main():
             printing.print_magenta("[ Installing libfridge... ]")
             os.system("make && sudo make install")
             os.chdir(cwd)
+    elif args.hw in ("demo", "tutorial"):
+        if os.path.isdir(args.hw):
+            _prompt_overwrite(args.hw, args.hw)
+
+        create_dir("demo")
+        os.chdir("demo")
+
+        # Submissions are in pygrader/tutorial/fake-submissions
+        fake_subs_path = os.path.join(pygrader_dir, "demo", "fake-submissions")
+        shutil.copytree(os.path.join(fake_subs_path, "student1"), "student1")
+        shutil.copytree(os.path.join(fake_subs_path, "student2"), "student2")
+        shutil.copytree(os.path.join(fake_subs_path, "student3"), "student3")
+
     else:
         sys.exit(f"Unsupported assignment: {args.hw}")
 
