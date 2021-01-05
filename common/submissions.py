@@ -117,3 +117,13 @@ def tag(tag_name: str) -> Callable:  # pylint: disable=unused-argument
         return checkout_to_tag_then_test
 
     return function_wrapper
+
+def apply_patch(repo: git.Repo, patch_path: str) -> bool:
+    """Applies a patch to the current dir (assumed to be a repo)"""
+    try:
+        repo.git.am(patch_path)
+    except git.GitError as e:
+        print(e)
+        return False
+
+    return True

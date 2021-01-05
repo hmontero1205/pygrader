@@ -10,6 +10,7 @@ import git
 from common.hw_base import HW, directory
 import common.utils as u
 import common.printing as pr
+import common.submissions as subs
 
 HW_ROOT = "demo"
 DEMO_ALIASES = {"tutorial", "demo", "meme"}
@@ -63,14 +64,8 @@ class DEMO(HW):
         self.repo = git.Repo.init(self.submission_dir) # Create empty repo
 
         # Apply the submission patch
-        try:
-            self.repo.git.am(os.path.join(self.hw_workspace,
-                             f"{self.submitter}.patch"))
-        except Exception as e:
-            print(e)
-            return False
-
-        return True
+        return subs.apply_patch(self.repo,
+                os.path.join(self.hw_workspace, f"{self.submitter}.patch"))
 
     def cleanup(self):
         """Post demo cleanup"""
