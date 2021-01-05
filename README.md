@@ -1,7 +1,9 @@
 [![pylint](https://github.com/hmontero1205/pygrader/workflows/pylint/badge.svg)](https://github.com/hmontero1205/pygrader/actions?query=workflow%3Apylint)
 
 # pygrader
-A generic grading framework for coding assignments.
+Generic grading framework for coding assignments.
+
+Originally made for COMS 4118 Operating Systems at Columbia University
 
 # Guide
 ## Dependency Installation
