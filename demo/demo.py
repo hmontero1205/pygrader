@@ -93,6 +93,7 @@ class DEMO(HW):
     @directory("root")
     def grade_B1(self):
         """B1: written answers"""
+        pr.print_magenta("[ Dumping Q1 below ]")
         u.extract_between(self.written_answers, # File
                           "= Q1 =", # Top barrier
                           "= Q2 =", # Bottom barrier
@@ -100,8 +101,10 @@ class DEMO(HW):
 
         u.prompt_continue() # Don't display Q2 until grader presses enter
 
+        pr.print_magenta("\n[ Dumping Q2 below ]")
         u.extract_between(self.written_answers, "= Q2 =", "= Q3 =")
         u.prompt_continue()
+        pr.print_magenta("\n[ Dumping Q3 below ]")
         u.extract_between(self.written_answers, "= Q3 =", "======")
 
     @directory("swap") # cd into swap/ before running function
