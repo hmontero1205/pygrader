@@ -9,7 +9,7 @@
         "A2": {
             "name": "A2",
             "points_per_subitem": [ -5 ],
-            "desc_per_subitem": [ "Less than 5 meaningful git commits" ]
+            "desc_per_subitem": [ "Less than 3 meaningful git commits" ]
         }
     },
     "B": {
