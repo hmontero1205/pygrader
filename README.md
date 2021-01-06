@@ -3,7 +3,7 @@
 # pygrader
 Generic grading framework for coding assignments.
 
-Originally made for COMS 4118 Operating Systems at Columbia University
+Originally made for [COMS 4118 Operating Systems](http://www.cs.columbia.edu/~jae/4118/) at Columbia University.
 
 # Guide
 ## Dependency Installation
