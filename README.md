@@ -3,7 +3,8 @@
 # pygrader
 Generic grading framework for coding assignments.
 
-Originally made for [COMS 4118 Operating Systems](http://www.cs.columbia.edu/~jae/4118/) at Columbia University.
+Originally made for [COMS 4118 Operating
+Systems](http://www.cs.columbia.edu/~jae/4118/) at Columbia University.
 
 # Guide
 ## Dependency Installation
@@ -66,8 +67,8 @@ Each submission you grade will be recorded here. This file is updated as you
 grade. You can also manually update this file. Here's a breakdown of the fields:
 - `is_late` is a boolean indicating whether or not any part of the submission
   was submitted after the deadline (stored in `deadline.txt`). This is used to
-  apply the late penalty when you run `./grade --dump hwN`. This field is updated
-  by the grader if it finds that the submission is late.
+  apply the late penalty when you run `./grade --dump hwN`. This field is
+  updated by the grader if it finds that the submission is late.
 - `scores` maps a rubric subitem to its grading result. The `award` and
   `comments` start off as `null`, which means you haven't graded that subitem
   yet. When dumping grades, subitems that have `award = null` are not included.
@@ -149,9 +150,11 @@ some terminology you'll see throughout the repo:
   record for a given submission (how many points were awarded and comments left
   by the TA).
 ## Rubrics and HW Classes
-There are a few building blocks that make up the homework representation in this grader.
+There are a few building blocks that make up the homework representation in this
+grader.
 ### Rubric Files
-HW assignments have a corresponding rubric found in `hwN/hwN_rubric.json` that look something like this:
+HW assignments have a corresponding rubric found in `hwN/hwN_rubric.json` that
+look something like this:
 ```
 {
     "B": {
