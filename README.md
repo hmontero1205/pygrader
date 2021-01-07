@@ -10,6 +10,8 @@ assignments into the pygrader framework and to get a feel for the grading
 process!
 
 # Guide
+pygrader has only been tested on Linux Debian 10.5 and Ubuntu 18.04 with
+python3.7.
 ## Dependency Installation
 Run the following:
 ```
