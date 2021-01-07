@@ -80,7 +80,7 @@ def print_double():
 
 def print_intro(team, hw, code):
     print_double()
-    print(f"{CCYAN}Team:{CEND} {CVIOLET2}{team}{CEND}  {CCYAN}HW:{CEND} "
+    print(f"{CCYAN}Name:{CEND} {CVIOLET2}{team}{CEND}  {CCYAN}HW:{CEND} "
           f"{CVIOLET2}{hw}{CEND}  {CCYAN}Rubric Code:{CEND} "
           f"{CVIOLET2}{code}{CEND}")
     print_double()
