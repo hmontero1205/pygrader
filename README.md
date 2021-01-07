@@ -225,7 +225,8 @@ little more flexible than some pylibrary like `termcolor`, although it might be
 worth looking into that.
 
 # Contributors
-- Dave Dirnfeld
-- Kent Hall
-- Evan Mesterhazy
-- Hans Montero
+- [Dave Dirnfeld](https://github.com/dd2912)
+- [Kent Hall](https://github.com/kentjhall)
+- [Patrick Hess](https://github.com/patawan)
+- [Evan Mesterhazy](https://github.com/emesterhazy)
+- [Hans Montero](https://github.com/hmontero1205)
