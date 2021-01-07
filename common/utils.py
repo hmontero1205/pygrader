@@ -13,7 +13,7 @@ RMMOD = "sudo rmmod {}"
 KEDR_STOP = "sudo kedr stop {}"
 DMESG = "sudo dmesg"
 DMESG_C = "sudo dmesg -C"
-MAKE = "make clean && make"
+MAKE = "make clean && make {}"
 
 # This template will extract all text in [start, end]
 SED_BETWEEN = "sed -n '/{0}/,/{1}/p' {2}"
@@ -210,23 +210,13 @@ def inspect_directory(files: List[str], pattern: Optional[str] = None,
 
 def compile_code(makefile_target: str = ""):
     """Compiles the current directory (either with Make or manually)"""
-    if makefile_target == "":
-        # When no makefile target is provided then
-        # default to original behavior of checking current folder
-        ls_output = os.listdir()
-        if "Makefile" not in ls_output:
-            # Let's let the grader figure it out
-            os.system("bash")
-    else:
-        # When makefile target is provided then
-        # check provided folder for makefile
-        ls_output = os.listdir(makefile_target)
-        if "Makefile" not in ls_output:
-            # Let's let the grader figure it out
-            os.system("bash")
+    ls_output = os.listdir()
+    if "Makefile" not in ls_output:
+        # Let's let the grader figure it out
+        os.system("bash")
 
     p.print_cyan("[ Compiling... ]")
-    ret = subprocess.call(MAKE, shell=True)
+    ret = subprocess.call(MAKE.format(makefile_target), shell=True)
 
     if ret != 0:
         p.print_red("[ OOPS ]")
@@ -369,5 +359,5 @@ def run_and_prompt_multi(test_name_to_callable: Dict[str, Callable],
         else:
             continue
 
-def prompt_continue(ptext: [str] = "[ Press enter to continue... ]"):
+def prompt_continue(ptext: str = "[ Press enter to continue... ]"):
     input(f"{p.CCYAN}{ptext}{p.CEND}")
