@@ -157,17 +157,17 @@ class Grader():
             self.print_subitem_grade(subitem_code)
             while True:
                 try:
-                    award = input(f"{p.CBLUE2}Award? [y/n]: {p.CEND}")
+                    award = input(f"{p.CBLUE2}Apply? [y/n]: {p.CEND}")
                     if award in ('y', 'n'):
                         break
-                except EOFError as _:
+                except EOFError:
                     print("^D")
                     continue
             while True:
                 try:
                     comments = input(f"{p.CBLUE2}Comments: {p.CEND}")
                     break
-                except EOFError as _:
+                except EOFError:
                     print("^D")
                     continue
 
