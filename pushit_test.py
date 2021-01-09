@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from pushit_trace import pushd, pushit, popd
+from pushit import pushd, pushit, popd
 
 def add_init():
     with open('__init__.py', 'w'): pass 
