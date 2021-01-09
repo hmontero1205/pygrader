@@ -1,8 +1,20 @@
 import os
+from pathlib import Path
+from pushit_trace import pushd, pushit, popd
 
-from pushit import pushd, pushit
+def add_init():
+    with open('__init__.py', 'w'): pass 
 
-print('Running "pushit/psuhd" demo..\n')
+def remove_init():
+    inpath = Path(os.getcwd()) / '__init__.py'
+
+    os.remove(inpath)
+
+os.makedirs('pushtest/pushtest1/pushtest2')
+
+
+
+print('Running "pushit/pushd" demo..\n')
 # dirs can be traced from home or by cwd only
 print('Echo:\n',pushd)
 print('-' * 50)
@@ -10,7 +22,7 @@ print('Empty call:\n',pushd())
 print('-' * 50)
 
 print('Single dir addition:') 
-pushd('test', chdir=False) 
+pushd('pushtest', chdir=False) 
 print('Empty Call:\n',pushd())
 print('-' * 50)
 
@@ -24,7 +36,7 @@ print('-'*50)
 
 print('Single dir addition w/o dir change: *correct way*')
 try:
-    pushd('test/test1', chdir=False) # Correct path specifed from current location of pushd
+    pushd('pushtest/pushtest1', chdir=False) # Correct path specifed from current location of pushd
 except FileNotFoundError as e:
     print(e)
 else:
@@ -33,7 +45,7 @@ print('Echo:\n',pushd)
 print('-'*50)
 
 print('Append right w/ dir change:')
-pushd('test/test1', right=True)
+pushd('pushtest/pushtest1', right=True)
 print('Echo:\n',pushd)
 print('-'*50)
 
@@ -59,24 +71,27 @@ print('Echo: ', pushd)
 print('...All Clear!')
 print('-' * 50)
 print('Single dir addition w/ dir change and queue instantion')
-pushd('test')
+pushd('pushtest')
 print('Echo: ', pushd)
 print('Another one...')
-pushd('test1')
+pushd('pushtest1')
 print('But wait..Now using relative paths')
 pushd('../..')
 print('Echo: ',pushd)
 print('-'* 50)
-print('\n--Context mgr 3 levels--') 
+pushd.clear()
+print('\n--Context mgr 3 levels--')
+pushd('pushtest', chdir=False)
+pushd('pushtest/pushtest1', chdir=False)
+pushd('pushtest/pushtest1/pushtest2', chdir=False)
+
 with pushit() as foo:
-    print('Level 1. Doing stuff in: ', os.getcwd())
+    add_init()
     with pushit() as bar:
-        print('LEvel 2. Doing stuff in: ', os.getcwd())
+        add_init()
         with pushit() as f:
-            print('Level 3. Doing stuff in: ', os.getcwd())  
-            print(f)
-        print('Returned to Level 2: ', os.getcwd())
-    print('Return to level 1: ', os.getcwd())
+                add_init()
+                print(f)
 print('-'*50)
 print('Echo: ', pushd)
 
@@ -86,4 +101,17 @@ with pushit('../..') as f:
     print('Do stuff here')
     print('CWD: ',os.getcwd())
 
+popd()
+pushd('pushtest', chdir=False)
+pushd('pushtest/pushtest1', chdir=False)
+pushd('pushtest/pushtest1/pushtest2', chdir=False)
 print('Echo: ', pushd)
+input('Press any key to remove newly created files/dir')
+with pushit() as f:
+    with pushit() as b:
+        with pushit() as foo:
+            remove_init()
+        remove_init()
+    remove_init()
+
+os.removedirs('pushtest/pushtest1/pushtest2')
