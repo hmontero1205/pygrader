@@ -53,7 +53,6 @@ class pushit(ContextDecorator):
     def __exit__(self, *exc):
         if self.prev_dir and (self.prev_dir != os.getcwd()):
             os.chdir(self.prev_dir)
-            print('We exited to: ', self.prev_dir)
         return False 
     
     def __repr__(self):
