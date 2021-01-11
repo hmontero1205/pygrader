@@ -69,9 +69,12 @@ def main():
         sys.exit()
 
     if args.inspect:
-        prompt = f"{p.CGREEN}({p.CYELLOW}pygrader{p.CGREEN})\\u{p.CCYAN}@\\h{p.CEND}:{p.CBLUE}\\w{p.CCYAN} \${p.CEND} "
+        # (pygrader)user@host:pwd $
+        prompt = (f"{p.CGREEN}({p.CYELLOW}pygrader{p.CGREEN})\\u{p.CCYAN}@"
+                  f"\\h{p.CEND}:{p.CBLUE}\\w{p.CCYAN} \${p.CEND} ")
         p.print_red("[ ^D/exit when done ]")
-        os.system(f"PROMPT_COMMAND='PS1=\"{prompt}\"; unset PROMPT_COMMAND' bash")
+        os.system(f"PROMPT_COMMAND='PS1=\"{prompt}\"; unset PROMPT_COMMAND' "
+                  f"bash")
         sys.exit()
 
     if not args.submitter:
