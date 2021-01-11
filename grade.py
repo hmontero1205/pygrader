@@ -48,13 +48,17 @@ def main():
                              help=("dump grades for this homework -- "
                                    "all if no submitter specified"),
                              dest="dump_grades")
+    script_mode.add_argument("-i", "--inspect", action="store_true",
+                             help=("drop into shell to inspect submission"),
+                             dest="inspect")
 
     args = parser.parse_args()
     env = {
             "regrade": args.regrade,
             "grade_only": args.grade_only,
             "test_only": args.test_only,
-            "dump_grades": args.dump_grades
+            "dump_grades": args.dump_grades,
+            "inspect": args.inspect
           }
 
     rubric_code = args.code if args.code else "all"
@@ -62,6 +66,15 @@ def main():
     tester = Grader(args.hw, args.submitter, rubric_code, env)
     if args.dump_grades:
         tester.grades.dump_grades(args.submitter, rubric_code.upper())
+        sys.exit()
+
+    if args.inspect:
+        # (pygrader)user@host:pwd $
+        prompt = (f"{p.CGREEN}({p.CYELLOW}pygrader{p.CGREEN})\\u{p.CCYAN}@"
+                  f"\\h{p.CEND}:{p.CBLUE}\\w{p.CCYAN} \${p.CEND} ")
+        p.print_red("[ ^D/exit when done ]")
+        os.system(f"PROMPT_COMMAND='PS1=\"{prompt}\"; unset PROMPT_COMMAND' "
+                  f"bash")
         sys.exit()
 
     if not args.submitter:

@@ -103,7 +103,7 @@ submission (or tag for Github-based assignments). The `is_late` field is set to
 
 ## Running the grading script
 ```
-usage: grade.py [-h] [-c [CODE]] [-g | -t] [-r | -d] hw [student]
+usage: grade.py [-h] [-c [CODE]] [-g | -t] [-r | -d | -i] hw [student]
 
 pygrader: Python Grading Framework
 
@@ -120,6 +120,7 @@ optional arguments:
   -r, --regrade         do not skip previously graded items
   -d, --dump-grades     dump grades for this homework -- all if no submitter
                         specified
+  -i, --inspect         drop into shell to inspect submission
 ```
 
 # Tips
@@ -137,6 +138,9 @@ optional arguments:
     - `./grade.py --dump <hw> --code=<code>`: all grades for rubric item `code`
     - `./grade.py --dump <hw> <student> --code=<code>`: student's grades for
       rubric item `code`.
+- If you want to simply build the submission and have a look around, run this:
+  `./grade.py -i <hw> <student>`. This will drop you into a shell at a pristine
+  version of the submission.
 
 # Repo Overview
 This section provides a high-level explanation of the design for this grader.
