@@ -1,0 +1,58 @@
+"""CHUNGUS/grader.py: Grading logic for CHUNGUS assignment"""
+
+from typing import Optional
+import os
+import shutil
+import sys
+
+import git
+
+from common.hw_base import HW, directory
+import common.utils as u
+import common.printing as pr
+import common.submissions as subs
+
+ALIASES = { "CHUNGUS" }
+
+class GRADER(HW):
+    """Grading rubic and tests for CHUNGUS assignment
+    Attributes:
+        scripts_dir: The directory containing the grading scripts
+        submission_dir: The submission directory
+        submitter: The name of the student/team
+        rubric: Python representation of the rubric
+        exit_handler: SIGINT handler
+    """
+
+    def __init__(self, submitter: Optional[str]):
+        # Set up the minimum to at least dump grades for all students
+        super().__init__("CHUNGUS", "rubric.json")
+        self.submitter = submitter
+
+        if submitter:
+            try:
+                u.is_dir(self.hw_workspace)
+            except ValueError:
+                sys.exit("Please run hw_setup before grading")
+
+            os.chdir(self.hw_workspace)
+
+            if not self.setup():
+                sys.exit(f"Couldn't setup {submitter}'s submission!")
+
+    def exit_handler(self, _signal, _frame):
+        """Handler for SIGINT"""
+        pr.print_cyan("\n[ Exiting CHUNGUS grader... ]")
+        self.cleanup()
+        sys.exit()
+
+    def setup(self) -> bool:
+        """Do any necessary setup for the submission"""
+        # TODO set self.submission_dir to submission repo directory, e.g.:
+        # self.submission_dir = os.path.join(self.hw_workspace, "CHUNGUS")
+        os.chdir(self.submission_dir)
+        return True
+
+    def cleanup(self):
+        """Post CHUNGUS cleanup"""
+

@@ -9,4 +9,4 @@ sudo dpkg -i ./bat_0.15.4_amd64.deb
 rm bat_0.15.4_amd64.deb
 
 # install python dependencies
-pip3 install -r requirements.txt
+python3.7 -m pip install -r requirements.txt

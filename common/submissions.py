@@ -7,8 +7,6 @@ from pytz import timezone
 import git
 import common.printing as printing
 
-HW_ORG = "cs4118-hw"
-
 def check_late(deadline_path, iso_timestamp):
     """Checks if iso_timestamp is past the deadline
 
@@ -47,7 +45,7 @@ def check_late(deadline_path, iso_timestamp):
     return True
 
 def checkout_to_team_master(
-        repo: git.Repo, hw_name: str, team: str) -> bool:
+        repo: git.Repo, team_repo_id: str, team: str) -> bool:
     repo.git.checkout("master")  # Make sure we're already on master (skel).
     try:
         repo.git.remote("rm", team)
@@ -59,8 +57,7 @@ def checkout_to_team_master(
     for tag_ref in repo.tags:
         repo.delete_tag(tag_ref)
 
-    repo_name = f"{hw_name}-{team}"
-    repo.create_remote(team, f"git@github.com:{HW_ORG}/{repo_name}.git")
+    repo.create_remote(team, f"git@github.com:{team_repo_id}.git")
 
     repo.git.fetch(team, "--tags")
     repo.git.fetch(team, "master")

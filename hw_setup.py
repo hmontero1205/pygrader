@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.7
 """hw_setup.py: Prepares grading enviorment"""
 import argparse
 import sys
@@ -10,8 +10,6 @@ from pathlib import Path
 from datetime import datetime
 from git import Repo
 from common import printing
-
-GITHUB_HW_ORG = "cs4118-hw"
 
 def create_dir(name):
     """Wrapper around mkdir"""
@@ -54,16 +52,6 @@ def _prompt_overwrite(hw_name: str, hw_path: str):
 
     shutil.rmtree(hw_path)
 
-def _clone_via_ssh(repo_name: str, init_submodules: bool):
-    repo = f"{GITHUB_HW_ORG}/{repo_name}"
-    printing.print_magenta(f"[ Cloning {repo}... ]")
-    repo_obj = Repo.clone_from(f"git@github.com:{repo}.git", repo_name)
-
-    if init_submodules:
-        # This hw requires submodules in the grader to be initialized.
-        repo_obj.git.submodule("update", "--init", "--recursive")
-        repo_obj.git.submodule("update", "--remote")
-
 def main():
     """Prompts for homework deadline and prepares submissions for grading"""
     parser = argparse.ArgumentParser()
@@ -78,78 +66,16 @@ def main():
     root = os.path.join(Path.home(), '.grade')
     create_dir(root)
 
-    pygrader_dir = os.getcwd()
+    pygrader_dir = Path(__file__).resolve().parent
 
     os.chdir(root)
-    if args.hw in ('hw1', 'linux-list'):
-        if not s_path:
-            sys.exit("hw1 usage: ./hw_setup hw1 -s <submission zipfile path>")
-        if not args.submissions or (not os.path.isfile(s_path) or
-                not zipfile.is_zipfile(s_path)):
-            sys.exit(f"Please provide a valid zip file. "
-                     f"Couldn't read file at {s_path}!")
+    
+    if os.path.isdir(args.hw):
+        _prompt_overwrite(args.hw, args.hw)
+    create_dir(args.hw)
+    os.chdir(args.hw)
 
-        if os.path.isdir("hw1"):
-            _prompt_overwrite(args.hw, "hw1")
-
-        create_dir("hw1")
-        with zipfile.ZipFile(s_path) as submissions_zip:
-            submissions_zip.extractall("hw1")
-
-        os.chdir("hw1")
-
-        # This logic is super sketchy because the Canvas naming convention
-        # is just not consistent at all...
-        for fname in os.listdir():
-            if os.path.isfile(fname) and tarfile.is_tarfile(fname):
-                without_ext = fname.split(".tgz")[0]
-                try:
-                    uni = without_ext.split("-")[1]
-                except IndexError as _:
-                    uni = without_ext.split("_")[-1]
-                uni = uni.strip("_")
-
-                create_dir(uni)
-                shutil.move(fname, os.path.join(uni, f"{uni}.tgz"))
-
-    elif args.hw in ('hw3', 'hw4', 'hw5', 'hw6',
-                     'exam1-2020-9', 'exam2-2020-9'):
-        if os.path.isdir(args.hw):
-            _prompt_overwrite(args.hw, args.hw)
-
-        # Creates .grade/hwn if it isn't there or if we want to overwrite.
-        create_dir(args.hw)
-
-        os.chdir(args.hw)
-
-        _clone_via_ssh(args.hw, init_submodules=(args.hw in ('hw5',)))
-
-        if args.hw == "hw5":
-            # We need to install libfridge.
-            cwd = os.getcwd()
-            os.chdir(os.path.join(pygrader_dir, "hw5", "fridge-sols",
-                                  "user", "lib", "libfridge"))
-            printing.print_magenta("[ Installing libfridge... ]")
-            os.system("make && sudo make install")
-            os.chdir(cwd)
-    elif args.hw in ("demo", "tutorial"):
-        if os.path.isdir(args.hw):
-            _prompt_overwrite(args.hw, args.hw)
-
-        create_dir("demo")
-        os.chdir("demo")
-
-        # Submissions are in pygrader/tutorial/fake-submissions
-        fake_subs_path = os.path.join(pygrader_dir, "demo", "fake-submissions")
-        for f in os.listdir(fake_subs_path):
-            sub = os.path.join(fake_subs_path, f)
-            if not os.path.isfile(sub):
-                continue
-
-            shutil.copy(sub, f)
-
-    else:
-        sys.exit(f"Unsupported assignment: {args.hw}")
+    os.system(os.path.join(pygrader_dir, args.hw, 'setup'))
 
     record_deadline()
     print(f"Ready to grade {args.hw}!")
