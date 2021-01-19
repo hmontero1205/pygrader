@@ -20,8 +20,8 @@ fi
 mkdir "$ASS" || exit
 echo -e "{\n}" > "$ASS/rubric.json"
 cp grader.py.in "$ASS/grader.py"
-sed -i "s/CHUNGUS/$ASS/g" "$ASS/grader.py"
+sed -i "s/ASSIGNMENT/$ASS/g" "$ASS/grader.py"
 test "$#" -gt 1 && cp clone_setup.in "$ASS/setup"
 touch "$ASS/setup"
 chmod +x "$ASS/setup"
-sed -i "s~CHUNGUS~$2~g" "$ASS/setup"
+sed -i "s~REPO~$2~g" "$ASS/setup"
