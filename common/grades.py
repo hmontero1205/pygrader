@@ -174,6 +174,9 @@ class Grades():
                    or not self.is_graded(f"{item_code}.1", name)):
                     continue
                 graded = True
+                if rubric_item.deduct_from:
+                    floor_pts = total_pts
+                    total_pts += rubric_item.deduct_from
                 for i, (pts, _) in enumerate(rubric_item.subitems, 1):
                     code = f"{item_code}.{i}"
                     raw_pts = pts if submission_scores[code]["award"] else 0
@@ -200,6 +203,8 @@ class Grades():
 
                     if item_comments:
                         all_comments.append(item_comments)
+                if rubric_item.deduct_from:
+                    total_pts = max(floor_pts, min(floor_pts + rubric_item.deduct_from, total_pts))
 
         # We assume that if the TA wants ALL submission grades, that they'll
         # also want to apply late penalities (they're about to finalize grades).

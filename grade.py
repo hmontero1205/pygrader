@@ -18,7 +18,7 @@ import common.utils as utils
 _, subdirs, _ = next(os.walk(os.path.dirname(os.path.realpath(__file__))))
 assignments = []
 for subdir in subdirs:
-    if subdir[0] != '.' and subdir != "common":
+    if subdir[0] != '.' and subdir != "common" and not subdir.endswith("_common"):
         assignments.append(importlib.import_module(f"{subdir}.grader"))
 
 def main():
@@ -124,9 +124,15 @@ class Grader():
     def print_intro(self, rubric_code: str):
         p.print_intro(self.submitter, self.hw_name, rubric_code)
 
+    def print_headerline(self, rubric_item: RubricItem):
+        header = 'Grading {}'.format(rubric_item.code)
+        if rubric_item.deduct_from:
+            header += ' ({}p, deductive)'.format(rubric_item.deduct_from)
+        p.print_green(header)
+
     def print_header(self, rubric_item: RubricItem):
         p.print_double()
-        p.print_green('Grading {}'.format(rubric_item.code))
+        self.print_headerline(rubric_item)
         self.print_subitems(rubric_item)
         p.print_double()
 
@@ -232,6 +238,8 @@ class Grader():
                 self.print_header(rubric_item)
                 rubric_item.tester()
             utils.run_and_prompt(test_wrapper)
+        else:
+            self.print_headerline(rubric_item)
 
         # if -t is not provided, ask for grade. If -t is provided skip
         if not self.env["test_only"]:
