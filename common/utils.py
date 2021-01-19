@@ -160,7 +160,7 @@ def inspect_string(s: str, pattern: Optional[str] = None,
     if pattern:
         cmd = f"{bat_str} | {grep_str}"
     else:
-        cmd = bat_str
+        cmd = f"{bat_str} {'--paging=never' if not use_pager else ''}"
 
     bat = cmd_popen(cmd)
     print(bat.communicate(input=s)[0])
@@ -175,7 +175,7 @@ def inspect_file(fname: str, pattern: Optional[str] = None,
     if pattern:
         cmd = f"{bat_str} | {grep_str}"
     else:
-        cmd = f"bat {fname}"
+        cmd = f"bat {name} {'--paging=never' if not use_pager else ''}"
     subprocess.run(cmd, shell=True)
 
 def inspect_directory(files: List[str], pattern: Optional[str] = None,
