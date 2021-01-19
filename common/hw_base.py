@@ -72,6 +72,9 @@ class HW():
 
         rubric = {}
         for table_k, table_v in rubric_json.items():
+            if table_k == "late_penalty":
+                rubric[table_k] = table_v
+                continue
             if table_k not in rubric:
                 rubric[table_k] = {}
 

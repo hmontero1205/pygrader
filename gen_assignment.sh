@@ -18,7 +18,7 @@ if [ -d "$ASS" ]; then
 fi
 
 mkdir "$ASS" || exit
-echo -e "{\n}" > "$ASS/rubric.json"
+cp rubric.json.in "$ASS/rubric.json"
 cp grader.py.in "$ASS/grader.py"
 sed -i "s/ASSIGNMENT/$ASS/g" "$ASS/grader.py"
 test "$#" -gt 1 && cp clone_setup.in "$ASS/setup"

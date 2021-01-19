@@ -8,7 +8,7 @@ from typing import Set, Dict, Union, Optional, Tuple
 
 import common.utils as utils
 
-LATE_PENALTY = .2
+DEFAULT_LATE_PENALTY = .2
 
 # Probably better to just look at a grades.json
 GradesDictType = Dict[str, # Submitter
@@ -40,6 +40,8 @@ class Grades():
     def _get_defined_rubric_subitems(self) -> Set[str]:
         subitems = set()
         for table_code in sorted(self.rubric.keys()):
+            if table_code == "late_penalty":
+                continue
             for item_code in sorted(self.rubric[table_code].keys()):
                 item = self.rubric[table_code][item_code]
                 for subitem_code in range(1, len(item.subitems) + 1):
@@ -84,6 +86,8 @@ class Grades():
         self._grades[self.submitter]["is_late"] = False
         rubric_scores = dict()
         for table_code in sorted(self.rubric.keys()):
+            if table_code == "late_penalty":
+                continue
             for item_code in sorted(self.rubric[table_code].keys()):
                 item = self.rubric[table_code][item_code]
                 for subitem_code in range(1, len(item.subitems) + 1):
@@ -167,7 +171,9 @@ class Grades():
         graded = False
         submission_scores = self._grades[name]["scores"]
 
-        for rubric_item_mappings in self.rubric.values():
+        for rubric_key, rubric_item_mappings in self.rubric.items():
+            if rubric_key == "late_penalty":
+                continue
             for item_code, rubric_item in rubric_item_mappings.items():
                 if(rubric_code != "ALL"
                    and not item_code.startswith(rubric_code)
@@ -214,8 +220,11 @@ class Grades():
             all_comments.insert(0, "(LATE)")
         concatted_comments = "; ".join(all_comments)
 
-        if rubric_code == "ALL" and self.is_late(name):
-            total_pts = round(total_pts * (1 - LATE_PENALTY), 2)
+        late_penalty = DEFAULT_LATE_PENALTY
+        if "late_penalty" in self.rubric:
+            late_penalty = self.rubric["late_penalty"]
+        if rubric_code == "ALL" and self.is_late(name) and late_penalty != 0:
+            total_pts = round(total_pts * (1 - late_penalty), 2)
 
         total_pts = max(total_pts, 0)
 

@@ -218,6 +218,8 @@ class Grader():
 
     def grade_all(self):
         for table in self.hw_class.rubric:
+            if table == "late_penalty":
+                continue
             self.grade_table(table)
 
     def grade_table(self, table_key: str):
