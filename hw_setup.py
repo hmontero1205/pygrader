@@ -70,7 +70,9 @@ def main():
     create_dir(args.hw)
     os.chdir(args.hw)
 
-    os.system(os.path.join(pygrader_dir, args.hw, 'setup'))
+    setup_script = os.path.join(pygrader_dir, args.hw, 'setup')
+    if os.path.isfile(setup_script) and os.access(setup_script, os.X_OK):
+        os.system(setup_script)
 
     record_deadline()
     print(f"Ready to grade {args.hw}!")
