@@ -204,7 +204,8 @@ class Grades():
                     if item_comments:
                         all_comments.append(item_comments)
                 if rubric_item.deduct_from:
-                    total_pts = max(floor_pts, min(floor_pts + rubric_item.deduct_from, total_pts))
+                    ceiled = min(floor_pts + rubric_item.deduct_from, total_pts)
+                    total_pts = max(floor_pts, ceiled)
 
         # We assume that if the TA wants ALL submission grades, that they'll
         # also want to apply late penalities (they're about to finalize grades).

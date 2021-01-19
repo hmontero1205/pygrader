@@ -154,7 +154,7 @@ def inspect_string(s: str, pattern: Optional[str] = None,
     if not lang:
         lang = "txt"
 
-    bat_str= f"bat --color=always -l {lang}"
+    bat_str = f"bat --color=always -l {lang}"
     grep_str = (f"GREP_COLORS='ms=01;91;107' grep --color=always "
                 f"-E '^|{pattern}' {'| less -R' if use_pager else ''}")
     if pattern:

@@ -4,11 +4,8 @@ import argparse
 import sys
 import os
 import shutil
-import tarfile
-import zipfile
 from pathlib import Path
 from datetime import datetime
-from git import Repo
 from common import printing
 
 def create_dir(name):
@@ -61,15 +58,13 @@ def main():
             help="path to zipfile containing all hw1 submissions")
     args = parser.parse_args()
 
-    s_path = os.path.abspath(args.submissions) if args.submissions else None
-
     root = os.path.join(Path.home(), '.grade')
     create_dir(root)
 
     pygrader_dir = Path(__file__).resolve().parent
 
     os.chdir(root)
-    
+
     if os.path.isdir(args.hw):
         _prompt_overwrite(args.hw, args.hw)
     create_dir(args.hw)
