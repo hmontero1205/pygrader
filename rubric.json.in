@@ -1,3 +1,10 @@
 {
-	"late_penalty": 0.2
+	"late_penalty": 1.0,
+        "A": {
+                "A1": {
+                        "name": "A1",
+                        "points_per_subitem": [ 0 ],
+                        "desc_per_subitem": [ "Dummy item" ]
+                }
+        }
 }

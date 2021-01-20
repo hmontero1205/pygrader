@@ -62,6 +62,9 @@ def main():
     create_dir(root)
 
     pygrader_dir = Path(__file__).resolve().parent
+    hw_dir = os.path.join(pygrader_dir, args.hw)
+    if not os.path.isdir(hw_dir):
+        sys.exit(f"Unsupported assignment: {args.hw}")
 
     os.chdir(root)
 
@@ -70,7 +73,7 @@ def main():
     create_dir(args.hw)
     os.chdir(args.hw)
 
-    setup_script = os.path.join(pygrader_dir, args.hw, 'setup')
+    setup_script = os.path.join(hw_dir, 'setup')
     if os.path.isfile(setup_script) and os.access(setup_script, os.X_OK):
         os.system(setup_script)
 

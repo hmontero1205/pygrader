@@ -180,9 +180,14 @@ class Grades():
                    or not self.is_graded(f"{item_code}.1", name)):
                     continue
                 graded = True
+
                 if rubric_item.deduct_from:
+                    # If a deductive item, we increment total_pts upfront
+                    # and floor it at its current value (s.t. our subitems
+                    # can't deduct us to below where we started).
                     floor_pts = total_pts
                     total_pts += rubric_item.deduct_from
+
                 for i, (pts, _) in enumerate(rubric_item.subitems, 1):
                     code = f"{item_code}.{i}"
                     raw_pts = pts if submission_scores[code]["award"] else 0
@@ -210,6 +215,8 @@ class Grades():
                     if item_comments:
                         all_comments.append(item_comments)
                 if rubric_item.deduct_from:
+                    # Enforce the bounds on our deductive item (i.e. clamping
+                    # total_pts to range [floor_pts, floor_pts + deduct_from]).
                     ceiled = min(floor_pts + rubric_item.deduct_from, total_pts)
                     total_pts = max(floor_pts, ceiled)
 
@@ -223,7 +230,7 @@ class Grades():
         late_penalty = DEFAULT_LATE_PENALTY
         if "late_penalty" in self.rubric:
             late_penalty = self.rubric["late_penalty"]
-        if rubric_code == "ALL" and self.is_late(name) and late_penalty != 0:
+        if rubric_code == "ALL" and self.is_late(name):
             total_pts = round(total_pts * (1 - late_penalty), 2)
 
         total_pts = max(total_pts, 0)

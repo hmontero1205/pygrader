@@ -45,7 +45,8 @@ def check_late(deadline_path, iso_timestamp):
     return True
 
 def checkout_to_team_branch(
-        repo: git.Repo, team_repo_id: str, team: str, branch_name: str) -> bool:
+        repo: git.Repo, team_repo_id: str,
+        team: str, branch_name: str = "master") -> bool:
     repo.git.checkout(branch_name)  # Make sure we're on the branch (skel).
     try:
         repo.git.remote("rm", team)
@@ -73,10 +74,6 @@ def checkout_to_team_branch(
     repo.git.checkout("-b", team_branch, f"{team}/{branch_name}")
 
     return True
-
-def checkout_to_team_master(
-        repo: git.Repo, team_repo_id: str, team: str) -> bool:
-    return checkout_to_team_branch(repo, team_repo_id, team, "master")
 
 def tag(tag_name: str) -> Callable:  # pylint: disable=unused-argument
     """Decorator function that checks out to tag_name before the test.
