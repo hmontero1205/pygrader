@@ -13,7 +13,7 @@ RMMOD = "sudo rmmod {}"
 KEDR_STOP = "sudo kedr stop {}"
 DMESG = "sudo dmesg"
 DMESG_C = "sudo dmesg -C"
-MAKE = "make clean && make {}"
+MAKE = "make clean ; make {}"
 
 # This template will extract all text in [start, end]
 SED_BETWEEN = "sed -n '/{0}/,/{1}/p' {2}"
