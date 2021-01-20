@@ -76,7 +76,8 @@ def main():
 
     setup_script = os.path.join(hw_dir, 'setup')
     if os.path.isfile(setup_script) and os.access(setup_script, os.X_OK):
-        os.system(f"{setup_script} {' '.join(getattr(parsed, '...'))}")
+        if os.system(f"{setup_script} {' '.join(getattr(parsed, '...'))}"):
+            sys.exit("Setup failed.")
 
     record_deadline()
     print(f"Ready to grade {parsed.hw}!")
