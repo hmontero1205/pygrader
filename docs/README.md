@@ -13,6 +13,8 @@ To avoid making your grading logic public to your students, you should make
 a [private fork](https://stackoverflow.com/questions/10065526/github-how-to-make-a-fork-of-public-repository-private) 
 of this repo before adding in your class-specific logic.
 
+Please help us build on this project! See our [contribution guide](./CONTRIBUTING.md).
+
 # Guide
 pygrader has only been tested on Linux Debian 10.5 and Ubuntu 18.04 with
 python3.7.
