@@ -1,6 +1,6 @@
 [![pylint](https://github.com/hmontero1205/pygrader/workflows/pylint/badge.svg)](https://github.com/hmontero1205/pygrader/actions?query=workflow%3Apylint)
 
-# pygrader
+# [pygrader](https://github.com/hmontero1205/pygrader)
 Generic grading framework for coding assignments, originally written for
 [COMS 4118 Operating Systems](http://www.cs.columbia.edu/~jae/4118/)
 at Columbia University.
@@ -8,6 +8,10 @@ at Columbia University.
 See the [demo](demo/README.md) for a walkthrough of how to hook your own
 assignments into the pygrader framework and to get a feel for the grading
 process!
+
+To avoid making your grading logic public to your students, you should make
+a [private fork](https://stackoverflow.com/questions/10065526/github-how-to-make-a-fork-of-public-repository-private) 
+of this repo before adding in your class-specific logic.
 
 # Guide
 pygrader has only been tested on Linux Debian 10.5 and Ubuntu 18.04 with
