@@ -5,7 +5,7 @@ Generic grading framework for coding assignments, originally written for
 [COMS 4118 Operating Systems](http://www.cs.columbia.edu/~jae/4118/)
 at Columbia University.
 
-See the [demo](demo/README.md) for a walkthrough of how to hook your own
+See the [demo](../demo/README.md) for a walkthrough of how to hook your own
 assignments into the pygrader framework and to get a feel for the grading
 process!
 
