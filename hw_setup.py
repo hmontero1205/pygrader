@@ -53,32 +53,33 @@ def main():
     """Prompts for homework deadline and prepares submissions for grading"""
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("hw", type=str, help="the hw to setup (e.g. hw1)")
-    parser.add_argument("-s", "--submissions", dest="submissions", type=str,
-            help="path to zipfile containing all hw1 submissions")
-    args = parser.parse_args()
+    parser.add_argument("hw", type=str,
+                        help="the assignment to setup (e.g. hw1)")
+    parser.add_argument("...", type=str, nargs=argparse.REMAINDER,
+                        help="any arguments for assignment setup script")
+    parsed = parser.parse_args()
 
     root = os.path.join(Path.home(), '.grade')
     create_dir(root)
 
     pygrader_dir = Path(__file__).resolve().parent
-    hw_dir = os.path.join(pygrader_dir, args.hw)
+    hw_dir = os.path.join(pygrader_dir, parsed.hw)
     if not os.path.isdir(hw_dir):
-        sys.exit(f"Unsupported assignment: {args.hw}")
+        sys.exit(f"Unsupported assignment: {parsed.hw}")
 
     os.chdir(root)
 
-    if os.path.isdir(args.hw):
-        _prompt_overwrite(args.hw, args.hw)
-    create_dir(args.hw)
-    os.chdir(args.hw)
+    if os.path.isdir(parsed.hw):
+        _prompt_overwrite(parsed.hw, parsed.hw)
+    create_dir(parsed.hw)
+    os.chdir(parsed.hw)
 
     setup_script = os.path.join(hw_dir, 'setup')
     if os.path.isfile(setup_script) and os.access(setup_script, os.X_OK):
-        os.system(setup_script)
+        os.system(f"{setup_script} {' '.join(getattr(parsed, '...'))}")
 
     record_deadline()
-    print(f"Ready to grade {args.hw}!")
+    print(f"Ready to grade {parsed.hw}!")
 
 if __name__ == '__main__':
     main()
