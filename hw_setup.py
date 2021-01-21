@@ -75,7 +75,7 @@ def main():
     os.chdir(parsed.hw)
 
     setup_script = os.path.join(hw_dir, 'setup')
-    if os.path.isfile(setup_script) and os.access(setup_script, os.X_OK):
+    if os.path.isfile(setup_script):
         if os.system(f"{setup_script} {' '.join(getattr(parsed, '...'))}"):
             sys.exit("Setup failed.")
 
