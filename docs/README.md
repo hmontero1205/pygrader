@@ -92,7 +92,7 @@ grade. You can also manually update this file. Here's a breakdown of the fields:
 Note that we don't store numeric values for subitem grades here. By simply
 storing `true`/`false`, we are able to rescale grades without having to regrade.
 All you'd have to do to rescale an assignment is to update the
-`hwN/hwN_rubric.json` and then re-dump grades to make sure you have the updated
+`hwN/rubric.json` and then re-dump grades to make sure you have the updated
 numbers.
 
 ### deadline.txt
@@ -104,8 +104,8 @@ later. For example:
 ```
 The grader will compare this date with the timestamp on the latest commit of the
 submission (or tag for Github-based assignments). The `is_late` field is set to
-`true` if the submission is late. The late penalty (defined in
-`common/submissions.py`) is then applied when dumping grades.
+`true` if the submission is late. The late penalty (defined by the `late_penalty`
+field in the assignment's `rubric.json`) is then applied when dumping grades.
 
 ## Running the grading script
 ```
@@ -168,10 +168,12 @@ some terminology you'll see throughout the repo:
 There are a few building blocks that make up the homework representation in this
 grader.
 ### Rubric Files
-HW assignments have a corresponding rubric found in `hwN/hwN_rubric.json` that
-look something like this:
+HW assignments have a corresponding rubric found in `hwN/rubric.json` that look
+something like this:
 ```
 {
+    "late_penalty": 1.0,
+    ...
     "B": {
         "B1": {
             "name": "B1",
@@ -196,11 +198,46 @@ look something like this:
     }
 }
 ```
-We see that each table code is mapped to a mapping from rubric item code to
-rubric item information. For each rubric item, we have its `name` ,
+Notice the assignment has a `late_penalty` field—this must be in the range
+[0.0, 1.0], and defines the percentage of points to be deducted for a late
+submission (in the above example 100% is deducted, so no credit).
+We then see that each table code is mapped to a mapping from rubric item code
+to rubric item information. For each rubric item, we have its `name`,
 `points_per_subitem`, and `desc_per_subitem`. Again, we have test functions per
 rubric item (B1), but we grade per subitem (B1.1, B1.2, B1.3).
 
+There is also support for deductive rubric items, identified by the presence
+of the `deducting_from` key; for example, a simple one might look like this:
+```
+{
+    "A": {
+        "A1": {
+            "name": "A1",
+            "deducting_from": 5,
+            "points_per_subitem": [
+                -5,
+                -5
+            ],
+            "desc_per_subitem": [
+                "foo",
+                "bar"
+            ]
+        }
+    }
+}
+```
+
+In the above example, A1 is worth a total of 5 points, as defined by
+`deducting_from`. A submission is awarded these points upfront, and subitems
+will deduct from them as they are applied. This offers a bit more flexibility
+in terms of how subitems are defined—here, a submission will lose all points
+for this rubric item if they hit "foo" or "bar". To define an equivalent item
+cumulatively, you would need to collapse "foo" and "bar" into a single item
+"foo OR bar" worth 5 points (the entire rubric item), even if the descriptions
+are long and/or unrelated. Note that applying both "foo" and "bar" will bottom
+out at a 5 point deduction (not awarding any points for the item) rather than
+deducting a cumulative 10, which is what differentiates a `deducting_from`
+rubric item from others which might have negative subitems.
 
 ### HW Base Class (`common/hw_base.py`).
 This is the base class that concrete hw instances will extend when instantiated.
@@ -208,7 +245,7 @@ This class is mainly responsible for parsing the rubric JSON file and connecting
 RubricItems with their corresponding `grade_ItemCode()` function. These
 functions are defined by the concrete hw class. This class also provides some
 default/common functionality.
-### Concrete HW Classes (`hwN/hwN.py`)
+### Concrete HW Classes (`hwN/grader.py`)
 These classes extend the HW base class and actually implement the tester
 functions for each rubric item. This is where the core grading logic for each
 assignment lives.
