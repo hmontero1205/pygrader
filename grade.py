@@ -19,6 +19,7 @@ _, subdirs, _ = next(os.walk(os.path.dirname(os.path.realpath(__file__))))
 assignments = []
 for subdir in subdirs:
     if subdir[0] != '.' and \
+       subdir != "docs" and \
        subdir != "common" and not subdir.endswith("_common"):
         assignments.append(importlib.import_module(f"{subdir}.grader"))
 
