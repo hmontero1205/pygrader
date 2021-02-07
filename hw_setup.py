@@ -21,6 +21,8 @@ def create_dir(name):
 
 def record_deadline():
     """Reads in a deadline and stores it"""
+    if os.path.exists("deadline.txt"):
+        return
     printing.print_magenta("[ Recording assignment deadline... ]")
     while True:
         try:

@@ -109,6 +109,7 @@ class Grader():
         self.submitter = submitter
         self.env = env
         self.hw_class = self._get_hw_class()
+        self.hw_class.grader = self
 
         signal.signal(signal.SIGINT, self.hw_class.exit_handler)
 
@@ -157,6 +158,8 @@ class Grader():
         """Prompts the TA for pts/comments"""
         for i, (pts, desc) in enumerate(rubric_item.subitems, 1):
             subitem_code = f"{rubric_item.code}.{i}"
+            if self.grades.is_graded(subitem_code):
+                continue
             p.print_magenta(f"{subitem_code} ({pts}p): {desc}")
             self.print_subitem_grade(subitem_code)
             while True:

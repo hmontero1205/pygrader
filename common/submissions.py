@@ -21,6 +21,9 @@ def check_late(deadline_path, iso_timestamp):
     with open(deadline_path, "r") as d:
         deadline_string = d.readline()
 
+    if not deadline_string:
+        return False
+
     raw_deadline = datetime.strptime(deadline_string, "%m/%d/%y %I:%M %p")
 
     nyc_tz = timezone("America/New_York")

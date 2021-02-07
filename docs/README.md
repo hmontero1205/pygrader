@@ -107,6 +107,11 @@ submission (or tag for Github-based assignments). The `is_late` field is set to
 `true` if the submission is late. The late penalty (defined by the `late_penalty`
 field in the assignment's `rubric.json`) is then applied when dumping grades.
 
+If you do not wish to support soft deadlines for your assignment, you may have
+your `setup` script create `deadline.txt` as an empty file to convey this, so
+that graders are not required to entered a deadline on `hw_setup.py` and no
+`late_penalty` is applied to submissions.
+
 ## Running the grading script
 ```
 usage: grade.py [-h] [-c [CODE]] [-g | -t] [-r | -d | -i] hw [student]
