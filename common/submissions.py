@@ -64,7 +64,10 @@ def checkout_to_team_branch(
     repo.create_remote(team, f"git@github.com:{team_repo_id}.git")
 
     repo.git.fetch(team, "--tags")
-    repo.git.fetch(team, "master")
+    try:
+        repo.git.fetch(team, "master")
+    except:
+        repo.git.fetch(team, "main")
 
     # Let's checkout to the team's branch.
     team_branch = f"{team}-{branch_name}"
@@ -74,7 +77,13 @@ def checkout_to_team_branch(
         # This branch doesn't exist.
         pass
 
-    repo.git.checkout("-b", team_branch, f"{team}/{branch_name}")
+    if branch_name == "master":
+        try:
+            repo.git.checkout("-b", team_branch, f"{team}/{branch_name}")
+        except:
+            repo.git.checkout("-b", team_branch, f"{team}/main")
+    else:
+            repo.git.checkout("-b", team_branch, f"{team}/{branch_name}")
 
     return True
 
