@@ -66,7 +66,7 @@ def checkout_to_team_branch(
     repo.git.fetch(team, "--tags")
     try:
         repo.git.fetch(team, "master")
-    except:
+    except git.GitError:
         repo.git.fetch(team, "main")
 
     # Let's checkout to the team's branch.
@@ -80,7 +80,7 @@ def checkout_to_team_branch(
     if branch_name == "master":
         try:
             repo.git.checkout("-b", team_branch, f"{team}/{branch_name}")
-        except:
+        except git.GitError:
             repo.git.checkout("-b", team_branch, f"{team}/main")
     else:
             repo.git.checkout("-b", team_branch, f"{team}/{branch_name}")

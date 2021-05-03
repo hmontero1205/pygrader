@@ -7,7 +7,6 @@ import json
 from pathlib import Path
 from dataclasses import dataclass
 
-from common.grades import Grades
 import common.utils as u
 import common.printing as printing
 import common.submissions as subs
