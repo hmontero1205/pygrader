@@ -17,8 +17,13 @@ and transparent grading.
 
 In the pygrader framework, we specify rubrics in JSON format. See
 [here](../README.md#repo-overview) for more discussion on that format. The demo
-rubric in `demo_rubric.json` is loosely based on a rubric from COMS 4118. Here's
-a breakdown of each section:
+rubric in `rubric.json` is loosely based on a rubric from COMS 4118. Here's a
+breakdown of each section:
+
+    "late_penalty": 0.2,
+
+This sets the late penalty for the assignment to 20%, s.t. 20% of however many
+points a submission earns are deducted from the final grade.
 
     "A": {
         "A1": {
@@ -96,10 +101,11 @@ This assignment is thus out of 40pts.
 Implement Grading Logic
 -----------------------
 Once the rubric is done, the next step is to code up the actual grading logic.
-I've done this in `demo.py`. We grade on the granularity of rubric items so I've
-implemented the functions `grade_{A1, A2, B1, C1, C2}()`. This was
-straightforward to do because most of the logic I needed was already implemented
-in `common/utils.py` and `common/submissions.py`.
+Every assignment has a `grader.py` which contains this logic. We grade on the
+granularity of rubric items so I've implemented the functions
+`grade_{A1, A2, B1, C1, C2}()`. This was straightforward to do because most of
+the logic I needed was already implemented in `common/utils.py` and
+`common/submissions.py`.
 
 I want to make a point of the written portion of this demo assignment. Having a
 solid grading infrastructure is a big motivating factor for moving away from

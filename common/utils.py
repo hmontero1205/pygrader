@@ -13,7 +13,7 @@ RMMOD = "sudo rmmod {}"
 KEDR_STOP = "sudo kedr stop {}"
 DMESG = "sudo dmesg"
 DMESG_C = "sudo dmesg -C"
-MAKE = "make clean && make {}"
+MAKE = "make clean ; make {}"
 
 # This template will extract all text in [start, end]
 SED_BETWEEN = "sed -n '/{0}/,/{1}/p' {2}"
@@ -23,7 +23,7 @@ SED_TO_END = "sed -n '/{0}/,$p' {1}"
 
 def cmd_popen(cmd: str) -> 'Process':
     """Uses subprocess.Popen to run a command, returns the object."""
-    prc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
+    prc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, # pylint: disable=R1732
                      executable="/bin/bash",
                      stdout=subprocess.PIPE,
                      stderr=subprocess.STDOUT, close_fds=True,
@@ -154,13 +154,13 @@ def inspect_string(s: str, pattern: Optional[str] = None,
     if not lang:
         lang = "txt"
 
-    bat_str= f"bat --color=always -l {lang}"
+    bat_str = f"bat --color=always -l {lang}"
     grep_str = (f"GREP_COLORS='ms=01;91;107' grep --color=always "
                 f"-E '^|{pattern}' {'| less -R' if use_pager else ''}")
     if pattern:
         cmd = f"{bat_str} | {grep_str}"
     else:
-        cmd = bat_str
+        cmd = f"{bat_str} {'--paging=never' if not use_pager else ''}"
 
     bat = cmd_popen(cmd)
     print(bat.communicate(input=s)[0])
@@ -175,7 +175,7 @@ def inspect_file(fname: str, pattern: Optional[str] = None,
     if pattern:
         cmd = f"{bat_str} | {grep_str}"
     else:
-        cmd = f"bat {fname}"
+        cmd = f"bat {name} {'--paging=never' if not use_pager else ''}"
     subprocess.run(cmd, shell=True)
 
 def inspect_directory(files: List[str], pattern: Optional[str] = None,

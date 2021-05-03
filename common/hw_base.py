@@ -21,6 +21,7 @@ class RubricItem():
         tester: Callback function to grade this item.
     """
     code: str
+    deduct_from: int
     subitems: List[Tuple[int, str]]
     tester: Callable
 
@@ -71,12 +72,19 @@ class HW():
 
         rubric = {}
         for table_k, table_v in rubric_json.items():
+            if table_k == "late_penalty":
+                rubric[table_k] = table_v
+                continue
             if table_k not in rubric:
                 rubric[table_k] = {}
 
             for item in table_v:
+                deduct_from = None
+                if 'deducting_from' in table_v[item]:
+                    deduct_from = table_v[item]['deducting_from']
                 ri_obg = RubricItem(
                             table_v[item]['name'],
+                            deduct_from,
                             list(zip(table_v[item]['points_per_subitem'],
                                     table_v[item]['desc_per_subitem'])),
                             getattr(self, "grade_" + item, self.default_grader))

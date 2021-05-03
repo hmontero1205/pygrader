@@ -1,0 +1,10 @@
+#!/usr/bin/env python3.7
+
+from git import Repo
+from pathlib import Path
+
+# Clone base repo for submissions (to be used as submission directory)
+print("[ Cloning REPO... ]")
+repo_obj = Repo.clone_from("git@github.com:REPO.git", Path(__file__).resolve().parent.name)
+repo_obj.git.submodule("update", "--init", "--recursive")
+repo_obj.git.submodule("update", "--remote")

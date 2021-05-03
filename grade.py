@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.7
 
 """grade.py: Grading driver"""
 
@@ -6,21 +6,22 @@ import os
 import sys
 import signal
 import argparse
+import importlib
 from typing import Dict
 
-# from hw1.hw1 import HW1, HW1_ALIASES
-# from hw3.hw3 import HW3, HW3_ALIASES
-# from hw4.hw4 import HW4, HW4_ALIASES
-# from hw5.hw5 import HW5, HW5_ALIASES
-# from hw6.hw6 import HW6, HW6_ALIASES
-# from exam1.exam1 import EXAM1, EXAM1_ALIASES
-# from exam2.exam2 import EXAM2, EXAM2_ALIASES
-from demo.demo import DEMO, DEMO_ALIASES
 from common.grades import Grades
 from common.hw_base import RubricItem
 
 import common.printing as p
 import common.utils as utils
+
+_, subdirs, _ = next(os.walk(os.path.dirname(os.path.realpath(__file__))))
+assignments = []
+for subdir in subdirs:
+    if subdir[0] != '.' and \
+       subdir != "docs" and \
+       subdir != "common" and not subdir.endswith("_common"):
+        assignments.append(importlib.import_module(f"{subdir}.grader"))
 
 def main():
     """Entry-point into the grader"""
@@ -108,6 +109,7 @@ class Grader():
         self.submitter = submitter
         self.env = env
         self.hw_class = self._get_hw_class()
+        self.hw_class.grader = self
 
         signal.signal(signal.SIGINT, self.hw_class.exit_handler)
 
@@ -117,33 +119,23 @@ class Grader():
                              self.submitter)
 
     def _get_hw_class(self):
-        # if self.hw_name.lower() in HW1_ALIASES:
-        #     return HW1(self.submitter)
-        # elif self.hw_name.lower() == "hw2":
-        #     sys.exit("There is no HW2 -- Just like Windows 9 :)")
-        # elif self.hw_name.lower() in HW3_ALIASES:
-        #     return HW3(self.submitter)
-        # elif self.hw_name.lower() in HW4_ALIASES:
-        #     return HW4(self.submitter)
-        # elif self.hw_name.lower() in HW5_ALIASES:
-        #     return HW5(self.submitter)
-        # elif self.hw_name.lower() in HW6_ALIASES:
-        #     return HW6(self.submitter)
-        # elif self.hw_name.lower() in EXAM1_ALIASES:
-        #     return EXAM1(self.submitter)
-        # elif self.hw_name.lower() in EXAM2_ALIASES:
-        #     return EXAM2(self.submitter)
-        if self.hw_name.lower() in DEMO_ALIASES:
-            return DEMO(self.submitter)
-        else:
-            sys.exit(f"Unsupported assignment: {self.hw_name}")
+        for assignment in assignments:
+            if self.hw_name.lower() in assignment.ALIASES:
+                return assignment.GRADER(self.submitter)
+        sys.exit(f"Unsupported assignment: {self.hw_name}")
 
     def print_intro(self, rubric_code: str):
         p.print_intro(self.submitter, self.hw_name, rubric_code)
 
+    def print_headerline(self, rubric_item: RubricItem):
+        header = 'Grading {}'.format(rubric_item.code)
+        if rubric_item.deduct_from:
+            header += ' ({}p, deductive)'.format(rubric_item.deduct_from)
+        p.print_green(header)
+
     def print_header(self, rubric_item: RubricItem):
         p.print_double()
-        p.print_green('Grading {}'.format(rubric_item.code))
+        self.print_headerline(rubric_item)
         self.print_subitems(rubric_item)
         p.print_double()
 
@@ -228,6 +220,8 @@ class Grader():
 
     def grade_all(self):
         for table in self.hw_class.rubric:
+            if table == "late_penalty":
+                continue
             self.grade_table(table)
 
     def grade_table(self, table_key: str):
@@ -249,6 +243,8 @@ class Grader():
                 self.print_header(rubric_item)
                 rubric_item.tester()
             utils.run_and_prompt(test_wrapper)
+        else:
+            self.print_headerline(rubric_item)
 
         # if -t is not provided, ask for grade. If -t is provided skip
         if not self.env["test_only"]:

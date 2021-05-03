@@ -1,4 +1,4 @@
-"""demo.py: Sample grading logic for a coding assignment"""
+"""demo/grader.py: Grading logic for demo assignment"""
 
 from typing import Optional
 import os
@@ -12,11 +12,9 @@ import common.utils as u
 import common.printing as pr
 import common.submissions as subs
 
-HW_ROOT = "demo"
-DEMO_ALIASES = {"tutorial", "demo", "meme"}
-RUBRIC_NAME = "demo_rubric.json"
+ALIASES = {"tutorial", "demo", "meme"}
 
-class DEMO(HW):
+class GRADER(HW):
     """Grading rubic and tests for demo assignment
     Attributes:
         scripts_dir: The directory containing the grading scripts
@@ -28,12 +26,10 @@ class DEMO(HW):
 
     def __init__(self, submitter: Optional[str]):
         # Set up the minimum to at least dump grades for all students
-        super().__init__("demo", RUBRIC_NAME)
+        super().__init__("demo", "rubric.json")
         self.submitter = submitter
 
         if submitter:
-            self.submission_dir = os.path.join(self.hw_workspace, self.submitter)
-
             try:
                 u.is_dir(self.hw_workspace)
             except ValueError:
@@ -55,6 +51,8 @@ class DEMO(HW):
 
     def setup(self) -> bool:
         """Do any necessary setup for the submission"""
+        # Set directory containing submission repo
+        self.submission_dir = os.path.join(self.hw_workspace, self.submitter)
 
         # Remove the dir to start fresh
         shutil.rmtree(self.submission_dir, ignore_errors=True)

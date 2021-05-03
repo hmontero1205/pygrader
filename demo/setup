@@ -1,0 +1,15 @@
+#!/usr/bin/env python3.7
+
+import os
+import shutil
+from pathlib import Path
+
+demo_dir = Path(__file__).resolve().parent
+
+# Submissions are in pygrader/tutorial/fake-submissions
+fake_subs_path = os.path.join(demo_dir, "fake-submissions")
+for f in os.listdir(fake_subs_path):
+    sub = os.path.join(fake_subs_path, f)
+    if not os.path.isfile(sub):
+        continue
+    shutil.copy(sub, f)
