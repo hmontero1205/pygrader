@@ -50,7 +50,10 @@ class HW():
 
     def __init__(self, hw_name, rubric_name):
         self.hw_name = hw_name
-        self.hw_workspace = os.path.join(Path.home(), ".grade", hw_name)
+        self.hw_workspace = os.path.join(Path.home(),
+                                         ".grade",
+                                         os.getenv("TA", default=''),
+                                         hw_name)
 
         # Find grader root relative to hw_base.py: root/common/hw_base.py
         pygrader_root = Path(__file__).resolve().parent.parent

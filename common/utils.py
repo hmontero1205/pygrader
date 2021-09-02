@@ -26,7 +26,7 @@ def cmd_popen(cmd: str) -> 'Process':
     prc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, # pylint: disable=R1732
                      executable="/bin/bash",
                      stdout=subprocess.PIPE,
-                     stderr=subprocess.STDOUT, close_fds=True,
+                     stderr=subprocess.PIPE, close_fds=True,
                      universal_newlines=True)
     return prc
 
@@ -58,8 +58,8 @@ def prompt_file_name(file_list: Optional[List[str]] = None) -> str:
 
     while True:
         try:
-            select = int(input("Enter choice number: "))
-        except ValueError as _:
+            select = int(input("Enter choice number or Ctrl-D: "))
+        except ValueError:
             continue
 
         if 0 < select <= len(ls_output):
@@ -73,7 +73,11 @@ def get_file(fname: str) -> str:
     p.print_red('_'*85)
     p.print_red(f"Couldn't find {fname}! "
                 f"Did the student name it something else?")
-    submission_name = prompt_file_name()
+    try:
+        submission_name = prompt_file_name()
+    except EOFError as e:
+        raise Exception(f"Couldn't get {fname}") from e
+
     p.print_red('‾'*85)
     return submission_name
 
@@ -111,14 +115,22 @@ def extract_function(file_name: str, funct_name: str) -> str:
     stack = []
     started = False
     funct = ""
+    block_comment_count = 0
     with open(file_name, "r") as f:
         lines = f.readlines()
         for line in lines:
-            if not funct_name in line and not started:
+            if "/*" in line:
+                block_comment_count += 1
+            if "*/" in line:
+                block_comment_count -= 1
+
+            if block_comment_count > 0 or (not funct_name in line
+                                           and not started):
                 continue
 
             is_prototype = "{" not in line and ";" in line
-            if funct_name in line and not is_prototype:
+            is_line_comment = "//" in line
+            if funct_name in line and not is_prototype and not is_line_comment:
                 started = True
 
             funct += line
@@ -138,7 +150,7 @@ def grep_file(fname: str, pattern: str, padding: int = 0) -> int:
     NOTE: Grep output is dumped to the shell."""
     fname = get_file(fname)
     padding_opt = "" if not padding else f"-C {padding}"
-    cmd = f"grep --color=always {padding_opt} -E '{pattern}' {fname} "
+    cmd = f"grep --color=always -n {padding_opt} -E '{pattern}' {fname} "
     return subprocess.run(cmd, shell=True).returncode
 
 def grep_string(words: str, pattern: str, padding: int = 0) -> int:
