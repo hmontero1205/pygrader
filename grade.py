@@ -7,7 +7,7 @@ import sys
 import signal
 import argparse
 import importlib
-from typing import Dict
+from typing import Dict, Optional, Tuple, List
 
 from common.grades import Grades
 from common.hw_base import RubricItem
@@ -49,6 +49,10 @@ def main():
                              help=("dump grades for this homework -- "
                                    "all if no submitter specified"),
                              dest="dump_grades")
+    script_mode.add_argument("-s", "--status", action="store_true",
+                             help=("return grading status for this homework -- "
+                                   "all if no submitter specified"),
+                             dest="status")
     script_mode.add_argument("-i", "--inspect", action="store_true",
                              help=("drop into shell to inspect submission"),
                              dest="inspect")
@@ -59,20 +63,27 @@ def main():
             "grade_only": args.grade_only,
             "test_only": args.test_only,
             "dump_grades": args.dump_grades,
+            "status": args.status,
             "inspect": args.inspect
           }
 
     rubric_code = args.code if args.code else "all"
 
     tester = Grader(args.hw, args.submitter, rubric_code, env)
+
     if args.dump_grades:
         tester.grades.dump_grades(args.submitter, rubric_code.upper())
         sys.exit()
 
+
+    if args.status:
+        all_graded = tester.grades.status(args.submitter, rubric_code.upper())
+        sys.exit(not all_graded) # If all graded, exit with 0 (success)
+
     if args.inspect:
         # (pygrader)user@host:pwd $
-        prompt = (f"{p.CGREEN}({p.CYELLOW}pygrader{p.CGREEN})\\u{p.CCYAN}@"
-                  f"\\h{p.CEND}:{p.CBLUE}\\w{p.CCYAN} \${p.CEND} ")
+        prompt = (f"{p.CGREEN}({p.CYELLOW}pygrader{p.CGREEN}){p.CEND}"
+                  f":{p.CBLUE}\\w{p.CCYAN} \${p.CEND} ")
         p.print_red("[ ^D/exit when done ]")
         os.system(f"PROMPT_COMMAND='PS1=\"{prompt}\"; unset PROMPT_COMMAND' "
                   f"bash")
@@ -83,9 +94,11 @@ def main():
     tester.grade()
 
     # TODO: add progress/percentage complete?
-    p.print_magenta("\n[ Pretty-printing pts/comments up until now... ]")
-    tester.grades.print_submission_grades()
-
+    p.print_magenta(
+            f"\n[ Pretty-printing pts/comments for {args.submitter}... ]")
+    _, _, s = tester.grades.get_submission_grades(args.submitter,
+                                                  rubric_code.upper())
+    print(s)
     # clean up
     tester.hw_class.cleanup()
 
@@ -154,30 +167,43 @@ class Grader():
         elif warn:
             p.print_yellow(f"[ {code} hasn't been graded yet ]")
 
-    def prompt_grade(self, rubric_item: RubricItem):
+    def prompt_grade(self, rubric_item: RubricItem,
+                     autogrades: Optional[List[Tuple[str, str]]] = None):
         """Prompts the TA for pts/comments"""
-        for i, (pts, desc) in enumerate(rubric_item.subitems, 1):
-            subitem_code = f"{rubric_item.code}.{i}"
-            p.print_magenta(f"{subitem_code} ({pts}p): {desc}")
-            self.print_subitem_grade(subitem_code)
-            while True:
-                try:
-                    award = input(f"{p.CBLUE2}Apply? [y/n]: {p.CEND}")
-                    if award in ('y', 'n'):
-                        break
-                except EOFError:
-                    print("^D")
-                    continue
-            while True:
-                try:
-                    comments = input(f"{p.CBLUE2}Comments: {p.CEND}")
-                    break
-                except EOFError:
-                    print("^D")
-                    continue
 
-            self.grades[subitem_code]["award"] = (award == 'y')
-            self.grades[subitem_code]["comments"] = comments
+        if autogrades:
+            if len(autogrades) != len(rubric_item.subitems):
+                raise Exception("Autogrades don't align with rubric item!")
+
+            for i, (a, c) in enumerate(autogrades, 1):
+                subitem_code = f"{rubric_item.code}.{i}"
+                self.grades[subitem_code]["award"] = (a == 'y')
+                self.grades[subitem_code]["comments"] = c
+
+        else:
+            for i, (pts, desc) in enumerate(rubric_item.subitems, 1):
+                subitem_code = f"{rubric_item.code}.{i}"
+                p.print_magenta(f"{subitem_code} ({pts}p): {desc}")
+                self.print_subitem_grade(subitem_code)
+                while True:
+                    try:
+                        award = input(f"{p.CBLUE2}Apply? [y/n]: {p.CEND}")
+                        award = award.strip().lower()
+                        if award in ('y', 'n'):
+                            break
+                    except EOFError:
+                        print("^D")
+                        continue
+                while True:
+                    try:
+                        comments = input(f"{p.CBLUE2}Comments: {p.CEND}")
+                        break
+                    except EOFError:
+                        print("^D")
+                        continue
+
+                self.grades[subitem_code]["award"] = (award == 'y')
+                self.grades[subitem_code]["comments"] = comments.strip()
 
         self.grades.synchronize()
 
@@ -232,17 +258,24 @@ class Grader():
 
     def grade_item(self, rubric_item: RubricItem):
         if (not self.env["test_only"] and not self.env["regrade"]
-            and self.grades.is_graded(f"{rubric_item.code}.1")):
+            and all(self.grades.is_graded(f"{rubric_item.code}.{si}")
+                     for si, _ in enumerate(rubric_item.subitems, 1))):
             p.print_yellow(
                     f"[ {rubric_item.code} has been graded, skipping... ]")
             return
 
         # if --grade-only/-g is not provided, run tests else skip tests
+        autogrades = None
         if not self.env["grade_only"]:
             def test_wrapper():
+                nonlocal autogrades
                 self.print_header(rubric_item)
-                rubric_item.tester()
-            utils.run_and_prompt(test_wrapper)
+                autogrades = rubric_item.tester()
+
+            try:
+                utils.run_and_prompt(test_wrapper)
+            except Exception as e:  # pylint: disable=W0703
+                p.print_red(f"\n\n[ Exception: {e} ]")
         else:
             self.print_headerline(rubric_item)
 
@@ -261,7 +294,7 @@ class Grader():
                 # we don't want to mark submissions that are late on master
                 # late if none of the tags are late...
                 self.grades.set_late(True)
-            self.prompt_grade(rubric_item)
+            self.prompt_grade(rubric_item, autogrades)
         else:
             # Let the grader know if the subitems have been graded yet
             for i in range(1, len(rubric_item.subitems) + 1):

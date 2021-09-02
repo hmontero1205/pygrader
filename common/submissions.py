@@ -2,7 +2,8 @@
 
 import os
 from typing import Callable
-from datetime import datetime, timedelta
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from pytz import timezone
 import git
 import common.printing as printing
@@ -33,18 +34,11 @@ def check_late(deadline_path, iso_timestamp):
         printing.print_green("[ SUBMISSION ON TIME ]")
         return False
 
-    # Let's calculaute the difference
-    diff = submission - deadline
+    diff = relativedelta(submission, deadline)
+    printing.print_red(f"[SUBMISSION LATE]: Submitted {diff.days} days, "
+                       f"{diff.hours} hrs, {diff.minutes} mins, "
+                       f"and {diff.seconds} secs late")
 
-    # Wow this is like a page table walk xD
-    days, hrs_r = divmod(diff, timedelta(days=1))
-    hrs, mins_r = divmod(hrs_r, timedelta(hours=1))
-    mins, secs_r = divmod(mins_r, timedelta(minutes=1))
-    secs, _ = divmod(secs_r, timedelta(seconds=1))
-
-    printing.print_red(f"[SUBMISSION LATE]: Submitted {days} days, "
-                       f"{hrs} hrs, {mins} mins, "
-                       f"and {secs} secs late")
     return True
 
 def checkout_to_team_branch(

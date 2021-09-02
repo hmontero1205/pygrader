@@ -130,13 +130,14 @@ class Grades():
         graded_submissions = 0
 
         if submitter:
-            self.print_submission_grades(submitter, rubric_code)
+            _, _, s = self.get_submission_grades(submitter, rubric_code)
+            print(s)
         else:
             for name in sorted(self._grades, key=str.casefold):
-                is_graded, total_pts = self.print_submission_grades(name,
-                                                                    rubric_code)
-                all_pts += total_pts
-                if is_graded:
+                isg, tpts, s = self.get_submission_grades(name, rubric_code)
+                print(s)
+                all_pts += tpts
+                if isg:
                     graded_submissions += 1
 
 
@@ -145,11 +146,21 @@ class Grades():
             print(f"\nAverage across {graded_submissions} "
                   f"graded submission(s): {avg}")
 
+    def status(self, submitter: str, rubric_code: str) -> bool:
+        if submitter:
+            is_graded, _, _ = self.get_submission_grades(submitter, rubric_code)
+            return is_graded
+        else:
+            for name in sorted(self._grades, key=str.casefold):
+                is_graded, _, _ = self.get_submission_grades(name, rubric_code)
+                if not is_graded:
+                    return False
+            return True
 
-    def print_submission_grades(
+    def get_submission_grades(
             self, name: Optional[str] = None,
-            rubric_code: Optional[str] = None) -> Tuple[bool, float]:
-        """Prints (uni, pts, comments) in tsv format
+            rubric_code: Optional[str] = None) -> Tuple[bool, float, str]:
+        """Returns (uni, pts, comments) in tsv format
 
         Returns:
             A tuple with two members: a bool indicating whether or not this
@@ -168,7 +179,7 @@ class Grades():
 
         total_pts = 0
         all_comments = []
-        graded = False
+        at_least_one_graded = False
         submission_scores = self._grades[name]["scores"]
 
         for rubric_key, rubric_item_mappings in self.rubric.items():
@@ -176,10 +187,14 @@ class Grades():
                 continue
             for item_code, rubric_item in rubric_item_mappings.items():
                 if(rubric_code != "ALL"
-                   and not item_code.startswith(rubric_code)
-                   or not self.is_graded(f"{item_code}.1", name)):
+                        and not item_code.startswith(rubric_code)):
                     continue
-                graded = True
+                if not all(self.is_graded(f"{item_code}.{si}", name)
+                           for si, _ in enumerate(rubric_item.subitems, 1)):
+                    st = f"{name}\tn/a\tn/a"
+                    return False, total_pts, st
+
+                at_least_one_graded = True
 
                 if rubric_item.deduct_from:
                     # If a deductive item, we increment total_pts upfront
@@ -190,17 +205,18 @@ class Grades():
 
                 for i, (pts, _) in enumerate(rubric_item.subitems, 1):
                     code = f"{item_code}.{i}"
-                    raw_pts = pts if submission_scores[code]["award"] else 0
+                    applied = submission_scores[code]["award"]
+                    raw_pts = pts if applied else 0
                     total_pts += raw_pts
                     ta_comments = submission_scores[code]["comments"]
                     item_comments = ""
 
-                    if (((raw_pts and pts < 0)
-                        or (not raw_pts and not pts < 0)) or
-                            ta_comments):
-                        # Always print the code if points were not awarded for
-                        # a subitem. For deductive points, so we prepend the
-                        # code if it was awarded.
+                    if (((applied and pts <= 0)
+                        or (not applied and pts > 0))
+                        or ta_comments):
+                        # 1. You applied a deductive rubric item
+                        # 2. They lost an additive rubric item
+                        # 3. You left a comment on a rubric item
 
                         # If a section only has one item, print A2 instead of
                         # A2.1 since that's how we stylize our rubrics.
@@ -235,9 +251,10 @@ class Grades():
 
         total_pts = max(total_pts, 0)
 
-        if graded:
-            print(name, total_pts, concatted_comments, sep='\t')
+        st = ""
+        if at_least_one_graded:
+            st = f"{name}\t{total_pts}\t{concatted_comments}"
         else:
-            print(name, "n/a", "n/a", sep='\t')
+            st = f"{name}\tn/a\tn/a"
 
-        return graded, total_pts
+        return at_least_one_graded, total_pts, st
